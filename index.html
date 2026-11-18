@@ -17,6 +17,53 @@
       --muted: #9498a6;
       --cyan: #5bc0be;
       --success: #66bb6a;
+
+      /* Adaptive layout tokens (updated dynamically by device tier) */
+      --shell-max-w: 100%;
+      --pad-main: 12px;
+      --pad-card: 12px;
+      --font-body: 15px;
+      --font-ui: 13px;
+      --font-small: 12px;
+      --stat-cols: 3;
+      --skill-cols: 2;
+      --skill-max-h: 240px;
+    }
+
+    html[data-device="mobile"] {
+      --shell-max-w: 100%;
+      --pad-main: 10px;
+      --pad-card: 10px;
+      --font-body: 14.5px;
+      --font-ui: 13px;
+      --font-small: 11.5px;
+      --stat-cols: 3;
+      --skill-cols: 1;
+      --skill-max-h: 220px;
+    }
+
+    html[data-device="tablet"] {
+      --shell-max-w: 940px;
+      --pad-main: 16px;
+      --pad-card: 14px;
+      --font-body: 15.5px;
+      --font-ui: 14px;
+      --font-small: 12.5px;
+      --stat-cols: 3;
+      --skill-cols: 2;
+      --skill-max-h: 280px;
+    }
+
+    html[data-device="desktop"] {
+      --shell-max-w: 1120px;
+      --pad-main: 22px;
+      --pad-card: 18px;
+      --font-body: 16px;
+      --font-ui: 14px;
+      --font-small: 13px;
+      --stat-cols: 6;
+      --skill-cols: 3;
+      --skill-max-h: none;
     }
 
     *, *::before, *::after {
@@ -43,19 +90,19 @@
       height: 100%;
       display: flex;
       justify-content: center;
-      background: var(--bg);
+      background: #090a0e;
       overflow: hidden;
     }
 
     #app-shell {
       width: 100%;
-      max-width: 900px;
+      max-width: var(--shell-max-w);
       height: 100%;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
       background: var(--bg);
-      border-left: 1px solid rgba(255, 255, 255, 0.04);
-      border-right: 1px solid rgba(255, 255, 255, 0.04);
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
       overflow: hidden;
     }
 
@@ -63,8 +110,8 @@
       background: var(--panel);
       padding-top: max(10px, env(safe-area-inset-top));
       padding-bottom: 8px;
-      padding-left: max(12px, env(safe-area-inset-left));
-      padding-right: max(12px, env(safe-area-inset-right));
+      padding-left: max(var(--pad-main), env(safe-area-inset-left));
+      padding-right: max(var(--pad-main), env(safe-area-inset-right));
       border-bottom: 1px solid var(--border);
       display: flex;
       flex-direction: column;
@@ -74,9 +121,10 @@
     }
 
     .hud-top {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
       width: 100%;
     }
@@ -85,26 +133,27 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       min-width: 0;
     }
 
     .pill {
       background: var(--card);
       border: 1px solid var(--border);
-      padding: 4px 8px;
+      padding: 4px 9px;
       border-radius: 6px;
-      font-size: clamp(11px, 2.7vw, 13px);
+      font-size: var(--font-small);
       font-weight: 600;
       white-space: nowrap;
     }
     .pill.accent { color: var(--accent); }
     .pill.hp { color: #ff8a80; }
     .pill.ac { color: #90caf9; }
+    .pill.hw { color: var(--muted); font-weight: 500; }
 
     .hud-buttons {
       display: flex;
-      gap: 4px;
+      gap: 5px;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
@@ -114,18 +163,19 @@
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 5px 8px;
-      font-size: 12px;
+      padding: 5px 10px;
+      font-size: var(--font-small);
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
+    .btn-small:hover { border-color: var(--accent); }
 
     .panel-box {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -136,15 +186,15 @@
     .panel-box.hidden { display: none; }
 
     .info-text {
-      font-size: clamp(11px, 2.7vw, 13px);
-      line-height: 1.4;
+      font-size: var(--font-small);
+      line-height: 1.45;
       color: var(--text);
       overflow-wrap: anywhere;
     }
     .info-text strong { color: var(--accent); }
 
     #status-banner {
-      font-size: clamp(11px, 2.5vw, 12px);
+      font-size: var(--font-small);
       color: var(--muted);
       width: 100%;
       overflow: hidden;
@@ -152,24 +202,24 @@
       white-space: nowrap;
     }
 
-    /* Main Content Area: Holds either the Character Builder Wizard or the Story Log */
+    /* Main Content Area */
     #main-area {
       width: 100%;
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: clamp(10px, 2.8vw, 18px);
+      padding: var(--pad-main);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    /* Character Creation Wizard Styles */
+    /* Character Creation Wizard */
     #char-builder {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
     }
     #char-builder.hidden { display: none; }
@@ -178,10 +228,10 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px;
+      padding: var(--pad-card);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .wizard-step.hidden { display: none; }
 
@@ -190,29 +240,35 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
+      padding-bottom: 8px;
+      gap: 8px;
     }
     .step-title {
-      font-size: clamp(14px, 3.6vw, 16px);
+      font-size: calc(var(--font-body) + 1px);
       font-weight: 700;
       color: var(--accent);
     }
     .step-badge {
-      font-size: 11px;
+      font-size: var(--font-small);
       color: var(--muted);
       background: var(--card);
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 3px 8px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+    .step-badge.ready {
+      color: var(--success);
+      border: 1px solid rgba(102, 187, 106, 0.45);
     }
 
     .field-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       width: 100%;
     }
     .field-label {
-      font-size: 12px;
+      font-size: var(--font-small);
       color: var(--muted);
       font-weight: 600;
     }
@@ -220,14 +276,17 @@
     .grid-2 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      gap: 10px;
       width: 100%;
     }
+    html[data-device="mobile"] .grid-2 {
+      grid-template-columns: minmax(0, 1fr);
+    }
 
-    .grid-3 {
+    .stats-responsive-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(var(--stat-cols), minmax(0, 1fr));
+      gap: 8px;
       width: 100%;
     }
 
@@ -238,10 +297,13 @@
       width: 100%;
       align-items: center;
     }
+    html[data-device="mobile"] .grid-split.stack-mobile {
+      grid-template-columns: minmax(0, 1fr);
+    }
 
     select, input, button {
       font-family: inherit;
-      font-size: clamp(13px, 3.2vw, 15px);
+      font-size: var(--font-ui);
       border-radius: 7px;
       border: 1px solid var(--border);
       background: #12141c;
@@ -252,16 +314,17 @@
       width: 100%;
       min-width: 0;
       max-width: 100%;
-      padding: 9px 10px;
+      padding: 9px 11px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     button {
-      padding: 9px 12px;
+      padding: 9px 14px;
       cursor: pointer;
       font-weight: 600;
+      white-space: nowrap;
     }
     button.primary {
       background: var(--accent);
@@ -282,10 +345,10 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px;
+      padding: 8px 6px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       align-items: center;
       text-align: center;
     }
@@ -295,7 +358,7 @@
       color: var(--accent);
     }
     .stat-box .stat-final {
-      font-size: 13px;
+      font-size: var(--font-small);
       color: var(--cyan);
       font-weight: 700;
     }
@@ -313,30 +376,56 @@
 
     .skill-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
-      max-height: 210px;
+      grid-template-columns: repeat(var(--skill-cols), minmax(0, 1fr));
+      gap: 7px;
+      max-height: var(--skill-max-h);
       overflow-y: auto;
-      padding: 4px;
+      padding: 6px;
       background: #12141c;
       border: 1px solid var(--border);
-      border-radius: 7px;
+      border-radius: 8px;
     }
     .skill-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      padding: 5px 6px;
+      gap: 8px;
+      font-size: var(--font-small);
+      padding: 7px 8px;
       background: var(--card);
-      border-radius: 5px;
+      border: 1px solid transparent;
+      border-radius: 6px;
       cursor: pointer;
+      user-select: none;
     }
-    .skill-item input { accent-color: var(--accent); }
+    .skill-item:hover:not(.locked) {
+      border-color: var(--border);
+    }
+    .skill-item input {
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
     .skill-item.locked {
       border: 1px solid rgba(229, 169, 60, 0.45);
       color: var(--accent);
+      cursor: default;
     }
+    .skill-item.maxed {
+      opacity: 0.55;
+    }
+
+    .hw-note {
+      font-size: var(--font-small);
+      color: var(--muted);
+      background: rgba(91, 192, 190, 0.08);
+      border: 1px solid rgba(91, 192, 190, 0.25);
+      padding: 7px 10px;
+      border-radius: 6px;
+      line-height: 1.4;
+    }
+    .hw-note strong { color: var(--cyan); }
 
     .nav-row {
       display: flex;
@@ -349,14 +438,14 @@
     #story-log {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
     }
     #story-log.hidden { display: none; }
 
     .msg {
-      line-height: 1.5;
-      font-size: clamp(14px, 3.5vw, 16px);
+      line-height: 1.55;
+      font-size: var(--font-body);
       max-width: 100%;
       overflow-wrap: anywhere;
       word-break: break-word;
@@ -367,22 +456,22 @@
       color: var(--cyan);
       background: rgba(91, 192, 190, 0.1);
       border: 1px solid rgba(91, 192, 190, 0.25);
-      padding: 8px 12px;
+      padding: 9px 13px;
       border-radius: 8px;
       align-self: flex-end;
-      max-width: 88%;
+      max-width: 85%;
     }
     .msg.roll {
       background: #232016;
       border-left: 3px solid var(--accent);
-      padding: 8px 10px;
-      font-size: clamp(12px, 3vw, 14px);
+      padding: 8px 12px;
+      font-size: var(--font-ui);
       border-radius: 4px;
       color: #f7e6b5;
     }
     .msg.system {
       color: var(--muted);
-      font-size: clamp(11px, 2.8vw, 13px);
+      font-size: var(--font-small);
       font-style: italic;
     }
 
@@ -390,8 +479,8 @@
       background: var(--panel);
       padding-top: 8px;
       padding-bottom: max(10px, env(safe-area-inset-bottom));
-      padding-left: max(12px, env(safe-area-inset-left));
-      padding-right: max(12px, env(safe-area-inset-right));
+      padding-left: max(var(--pad-main), env(safe-area-inset-left));
+      padding-right: max(var(--pad-main), env(safe-area-inset-right));
       border-top: 1px solid var(--border);
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -404,7 +493,7 @@
       width: 100%;
       min-width: 0;
       padding: 10px 12px;
-      font-size: 16px;
+      font-size: 16px; /* Prevents iOS auto-zoom */
     }
   </style>
 </head>
@@ -418,6 +507,7 @@
           <span class="pill accent" id="class-pill">Character Builder</span>
           <span class="pill hp" id="hp-pill">HP --/--</span>
           <span class="pill ac" id="ac-pill">AC --</span>
+          <span class="pill hw" id="hardware-pill">Detecting hardware...</span>
         </div>
         <div class="hud-buttons">
           <button class="btn-small" id="sheet-btn" type="button">Sheet</button>
@@ -436,7 +526,7 @@
         <div class="info-text" id="sheet-gear"></div>
       </div>
 
-      <div id="status-banner">[v3.3 PHB/DMG Builder] Complete steps 1–4 to begin your adventure.</div>
+      <div id="status-banner">[v4.0 Adaptive Hardware] Complete steps 1–4 to begin your adventure.</div>
     </header>
 
     <main id="main-area">
@@ -524,7 +614,7 @@
             </select>
             <button type="button" class="secondary" id="reroll-btn">Reset / Roll</button>
           </div>
-          <div class="grid-3" id="stats-grid"></div>
+          <div class="stats-responsive-grid" id="stats-grid"></div>
           <div class="info-text" id="derived-combat-preview"></div>
           <div class="nav-row">
             <button type="button" class="secondary" id="back-step-2">&larr; Back</button>
@@ -538,14 +628,12 @@
             <span class="step-title">4. Skills, Gear & Launch</span>
             <span class="step-badge" id="skill-counter-badge">Pick Skills</span>
           </div>
-          <div class="field-label">Select Class Skill Proficiencies (+2 Prof. Bonus at Lv. 1):</div>
+          <div class="field-label">Select Class Skill Proficiencies (+2 Prof. Bonus at Lv. 1). Uncheck any skill to swap:</div>
           <div class="skill-grid" id="skill-grid"></div>
           <div class="info-text" id="gear-preview"></div>
-          <div class="grid-split">
-            <select id="engine-select">
-              <option value="webgpu">AI: On-Device WebGPU (Qwen 1.5B)</option>
-              <option value="localhost">AI: Localhost App (127.0.0.1:8080)</option>
-            </select>
+          <div class="hw-note" id="hw-model-note">Analyzing device capabilities for AI models...</div>
+          <div class="grid-split stack-mobile">
+            <select id="engine-select"></select>
             <button type="button" class="primary" id="init-btn">Begin Campaign</button>
           </div>
           <div class="nav-row">
@@ -570,10 +658,52 @@
 <script type="module">
   import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-  // 0. UNIVERSAL VIEWPORT SIZING
+  // 0. HARDWARE & ADAPTIVE DISPLAY SCALING
   const wrapper = document.getElementById("app-wrapper");
   const mainArea = document.getElementById("main-area");
-  function updateViewportSize() {
+  const hardwarePill = document.getElementById("hardware-pill");
+  const hwModelNote = document.getElementById("hw-model-note");
+  const engineSelect = document.getElementById("engine-select");
+
+  const hwProfile = {
+    deviceClass: "desktop", // "mobile" | "tablet" | "desktop"
+    label: "Desktop",
+    hasWebGPU: Boolean(navigator.gpu),
+    ramHintGB: navigator.deviceMemory || null,
+    cores: navigator.hardwareConcurrency || 4,
+    models: []
+  };
+
+  function detectLayoutClass() {
+    const ua = navigator.userAgent || "";
+    const width = window.innerWidth;
+    const isTouch = navigator.maxTouchPoints > 0;
+    const isIPhone = /iPhone|iPod/i.test(ua);
+    const isIPad = /iPad/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroidMobile = /Android/i.test(ua) && /Mobile/i.test(ua);
+    const isAndroidTablet = /Android/i.test(ua) && !/Mobile/i.test(ua);
+
+    if (isIPhone || isAndroidMobile || (width < 640 && isTouch)) {
+      return { deviceClass: "mobile", label: isIPhone ? "iPhone" : "Mobile" };
+    }
+    if (isIPad || isAndroidTablet || (width >= 640 && width <= 1180 && isTouch)) {
+      return { deviceClass: "tablet", label: isIPad ? "iPad" : "Tablet" };
+    }
+    if (width < 640) {
+      return { deviceClass: "mobile", label: "Compact Window" };
+    }
+    if (width <= 1180) {
+      return { deviceClass: "tablet", label: "Medium Display" };
+    }
+    return { deviceClass: "desktop", label: "Desktop / Laptop" };
+  }
+
+  function applyAdaptiveLayout() {
+    const detected = detectLayoutClass();
+    hwProfile.deviceClass = detected.deviceClass;
+    hwProfile.label = detected.label;
+    document.documentElement.setAttribute("data-device", detected.deviceClass);
+
     if (window.visualViewport) {
       wrapper.style.height = `${window.visualViewport.height}px`;
       wrapper.style.top = `${window.visualViewport.offsetTop}px`;
@@ -582,12 +712,106 @@
       wrapper.style.top = "0px";
     }
   }
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", updateViewportSize);
-    window.visualViewport.addEventListener("scroll", updateViewportSize);
+
+  async function initHardwareAndModels() {
+    applyAdaptiveLayout();
+
+    // Check WebGPU adapter if supported
+    let gpuTier = hwProfile.deviceClass;
+    let webgpuStatus = "No WebGPU";
+    if (navigator.gpu) {
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        if (adapter) {
+          hwProfile.hasWebGPU = true;
+          webgpuStatus = "WebGPU";
+          const maxBufMB = Math.round((adapter.limits?.maxBufferSize || 0) / (1024 * 1024));
+          // If a desktop reports low memory (<= 4GB) or very small WebGPU buffer, step down tier
+          if (gpuTier === "desktop" && ((hwProfile.ramHintGB && hwProfile.ramHintGB <= 4) || (maxBufMB > 0 && maxBufMB < 512))) {
+            gpuTier = "tablet";
+          }
+        } else {
+          hwProfile.hasWebGPU = false;
+        }
+      } catch (_) {
+        hwProfile.hasWebGPU = false;
+      }
+    }
+
+    // Build hardware-matched model options
+    if (gpuTier === "desktop") {
+      hwProfile.models = [
+        {
+          value: "webgpu:Llama-3.2-3B-Instruct-q4f16_1-MLC",
+          label: "Better Performance — Llama 3.2 3B (~2.2GB, Fast)"
+        },
+        {
+          value: "webgpu:Qwen2.5-7B-Instruct-q4f16_1-MLC",
+          label: "Better Intelligence — Qwen 2.5 7B (~4.5GB, Smarter / Slower)"
+        },
+        {
+          value: "localhost",
+          label: "Localhost Server (127.0.0.1:8080)"
+        }
+      ];
+    } else if (gpuTier === "tablet") {
+      hwProfile.models = [
+        {
+          value: "webgpu:Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+          label: "Better Performance — Qwen 2.5 1.5B (~1.1GB, Stable)"
+        },
+        {
+          value: "webgpu:Llama-3.2-3B-Instruct-q4f16_1-MLC",
+          label: "Better Intelligence — Llama 3.2 3B (~2.2GB, Slower / May Reload)"
+        },
+        {
+          value: "localhost",
+          label: "Localhost Server (127.0.0.1:8080)"
+        }
+      ];
+    } else {
+      hwProfile.models = [
+        {
+          value: "webgpu:Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+          label: "Better Performance — Qwen 2.5 1.5B (~1.1GB, Recommended)"
+        },
+        {
+          value: "webgpu:Llama-3.2-3B-Instruct-q4f16_1-MLC",
+          label: "Better Intelligence — Llama 3.2 3B (~2.2GB, May Be Unstable)"
+        },
+        {
+          value: "localhost",
+          label: "Localhost Server (127.0.0.1:8080)"
+        }
+      ];
+    }
+
+    const prevSelection = engineSelect.value;
+    engineSelect.innerHTML = "";
+    hwProfile.models.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.value;
+      opt.textContent = m.label;
+      engineSelect.appendChild(opt);
+    });
+    if (prevSelection && hwProfile.models.some(m => m.value === prevSelection)) {
+      engineSelect.value = prevSelection;
+    } else if (!hwProfile.hasWebGPU) {
+      engineSelect.value = "localhost";
+    }
+
+    const ramText = hwProfile.ramHintGB ? ` · ${hwProfile.ramHintGB}GB+ RAM` : "";
+    hardwarePill.textContent = `${hwProfile.label} · ${webgpuStatus}`;
+    hwModelNote.innerHTML = hwProfile.hasWebGPU
+      ? `<strong>Hardware Detected:</strong> ${hwProfile.label} (${hwProfile.cores} threads${ramText}, WebGPU ready). Model options below are matched to this device.`
+      : `<strong>Hardware Detected:</strong> ${hwProfile.label} (WebGPU unavailable in this browser). Use <strong>Localhost</strong> or open in Safari/Chrome with WebGPU enabled.`;
   }
-  window.addEventListener("resize", updateViewportSize);
-  updateViewportSize();
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", applyAdaptiveLayout);
+    window.visualViewport.addEventListener("scroll", applyAdaptiveLayout);
+  }
+  window.addEventListener("resize", applyAdaptiveLayout);
 
   // 1. PHB DATA TABLES (RACES, CLASSES, BACKGROUNDS, SKILLS)
   const STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
@@ -774,9 +998,7 @@
   const inputEl = document.getElementById("player-input");
   const sendBtn = document.getElementById("send-btn");
   const initBtn = document.getElementById("init-btn");
-  const engineSelect = document.getElementById("engine-select");
 
-  // Populate dropdowns
   Object.keys(RACES).forEach(r => {
     const opt = document.createElement("option");
     opt.value = r; opt.textContent = r;
@@ -852,35 +1074,56 @@
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result);
-        Object.assign(player, data.player);
-        player.chosenSkills = new Set(data.player.chosenSkills || []);
-        storyHistory = data.storyHistory || [];
+        const saved = data.player || {};
+        player.name = saved.name || "Adventurer";
+        player.race = RACES[saved.race] ? saved.race : "Human";
+        player.className = CLASSES[saved.className] ? saved.className : "Fighter";
+        player.background = BACKGROUNDS[saved.background] ? saved.background : "Soldier";
+        player.alignment = saved.alignment || "Neutral Good";
+        player.dmgTone = saved.dmgTone || "Heroic Fantasy";
+        player.level = saved.level || 1;
+        if (saved.baseStats) player.baseStats = { ...saved.baseStats };
+        player.chosenSkills = new Set(saved.chosenSkills || []);
+        player.recalculate();
+        // Preserve saved HP, AC, and Inventory instead of overwriting with defaults
+        if (typeof saved.hp === "number") player.hp = saved.hp;
+        if (typeof saved.maxHp === "number") player.maxHp = saved.maxHp;
+        if (typeof saved.ac === "number") player.ac = saved.ac;
+        if (Array.isArray(saved.inventory)) player.inventory = [...saved.inventory];
 
-        // Update UI inputs
+        storyHistory = Array.isArray(data.storyHistory) ? data.storyHistory : [];
+
+        // Sync form controls
         charNameInput.value = player.name;
         raceSelect.value = player.race;
         classSelect.value = player.className;
         bgSelect.value = player.background;
+        alignSelect.value = player.alignment;
+        dmgToneSelect.value = player.dmgTone;
 
-        refreshBuilderUI();
+        updateHud();
+        renderStatsGrid();
+        renderSkillGrid();
 
         // Rebuild story log on screen
         logEl.innerHTML = "";
         storyHistory.forEach(msg => {
           const type = msg.role === "assistant" ? "dm" : "player";
           const speaker = msg.role === "assistant" ? "DM" : player.name;
-          addMessage(`<strong>${speaker}:</strong> ${msg.content}`, type);
+          const cleanText = msg.role === "user" ? msg.content.replace(/\n\[SYSTEM:[\s\S]*\]$/, "") : msg.content;
+          addMessage(`<strong>${speaker}:</strong> ${cleanText}`, type);
         });
 
-        // Launch game view
         builderEl.classList.add("hidden");
         logEl.classList.remove("hidden");
         inputEl.disabled = false;
+        inputEl.placeholder = `What does ${player.name} do?`;
         sendBtn.disabled = false;
-        statusEl.textContent = "Save game imported successfully!";
+        statusEl.textContent = "Save imported! Tap 'Creator' -> 'Begin Campaign' if AI is not loaded yet.";
       } catch (err) {
         alert("Invalid save file format.");
       }
+      importFile.value = "";
     };
     reader.readAsText(file);
   };
@@ -988,45 +1231,51 @@
     });
   }
 
+  // FIXED SKILL GRID: Never auto-fills when you uncheck a skill
   function renderSkillGrid() {
     skillGrid.innerHTML = "";
     const cls = CLASSES[player.className];
     const bgSkills = BACKGROUNDS[player.background].skills;
 
+    // Only prune skills that are no longer valid for the current class/background
     Array.from(player.chosenSkills).forEach(sk => {
       if (!cls.skillPool.includes(sk) || bgSkills.includes(sk)) {
         player.chosenSkills.delete(sk);
       }
     });
-    for (const sk of cls.skillPool) {
-      if (player.chosenSkills.size >= cls.skillCount) break;
-      if (!bgSkills.includes(sk)) player.chosenSkills.add(sk);
+    // Trim excess if user switched from a class with more skills (e.g. Rogue -> Fighter)
+    while (player.chosenSkills.size > cls.skillCount) {
+      const last = Array.from(player.chosenSkills).pop();
+      player.chosenSkills.delete(last);
     }
 
-    document.getElementById("skill-counter-badge").textContent =
-      `Chosen: ${player.chosenSkills.size} / ${cls.skillCount} Class Skills`;
+    const atLimit = player.chosenSkills.size >= cls.skillCount;
+    const counterBadge = document.getElementById("skill-counter-badge");
+    counterBadge.textContent = `Chosen: ${player.chosenSkills.size} / ${cls.skillCount} Class Skills`;
+    counterBadge.classList.toggle("ready", player.chosenSkills.size === cls.skillCount);
 
     cls.skillPool.forEach(sk => {
       const isBg = bgSkills.includes(sk);
       const isChecked = isBg || player.chosenSkills.has(sk);
+      const isDisabled = isBg || (atLimit && !isChecked);
+
       const label = document.createElement("label");
-      label.className = `skill-item ${isBg ? "locked" : ""}`;
+      label.className = `skill-item ${isBg ? "locked" : ""} ${isDisabled && !isBg ? "maxed" : ""}`;
       label.innerHTML = `
-        <input type="checkbox" value="${sk}" ${isChecked ? "checked" : ""} ${isBg ? "disabled" : ""} />
+        <input type="checkbox" value="${sk}" ${isChecked ? "checked" : ""} ${isDisabled ? "disabled" : ""} />
         <span>${sk} (${SKILLS[sk]})${isBg ? " [BG]" : ""}</span>
       `;
       const cb = label.querySelector("input");
       cb.addEventListener("change", () => {
         if (cb.checked) {
-          if (player.chosenSkills.size >= cls.skillCount) {
-            cb.checked = false;
-            return;
+          if (player.chosenSkills.size < cls.skillCount) {
+            player.chosenSkills.add(sk);
           }
-          player.chosenSkills.add(sk);
         } else {
           player.chosenSkills.delete(sk);
         }
-        refreshBuilderUI();
+        renderSkillGrid();
+        updateHud();
       });
       skillGrid.appendChild(label);
     });
@@ -1086,20 +1335,36 @@
     document.getElementById("sheet-gear").innerHTML = `<strong>Equipment:</strong> ${player.inventory.join(", ")}`;
   }
 
-  // 4. AI DUNGEON MASTER & NATURAL CONVERSATION ENGINE
+  // 4. AI DUNGEON MASTER & STRICT ANTI-INVENTION ENGINE
   function getNarratorPrompt() {
     return `You are an expert Dungeons & Dragons 5e Dungeon Master running a "${player.dmgTone}" campaign following the Dungeon Master's Guide.
-The player character is ${player.name}, a Level 1 ${player.alignment} ${player.race} ${player.className} with the ${player.background} background.
-Core Rules:
-1. You are talking directly to the player. If they ask a context question (e.g., "Who am I with?", "What do I see?"), answer it factually and naturally.
-2. NEVER write actions, dialogue, or decisions for the player character. Let the player act.
-3. Keep responses under 2 short paragraphs, immersive and atmospheric.
-4. End by asking what they do next.`;
+THE PLAYER CHARACTER:
+- Name: ${player.name}
+- Sheet: Level 1 ${player.alignment} ${player.race} ${player.className} (${player.background})
+- EXACT INVENTORY (DO NOT INVENT WEAPONS OR ITEMS): ${player.inventory.join(", ")}
+- HP: ${player.hp}/${player.maxHp} | AC: ${player.ac}
+
+STRICT LAWS FOR THE DM:
+1. NEVER write actions, movements, dialogue, or decisions for ${player.name}. Only describe the world, environment, and NPCs. Let the player decide what they do.
+2. NEVER invent items, weapons, or gear in ${player.name}'s possession. They ONLY have what is listed in EXACT INVENTORY above.
+3. If the player asks a context question (e.g., "Who am I with?", "What do I see?"), answer it factually and naturally.
+4. Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
+5. Keep responses under 2 short paragraphs, vivid and atmospheric, and end by asking what they do next.`;
   }
 
   let mlcEngine = null;
+  let loadedModelId = null;
   let activeMode = "webgpu";
+  let activeModelId = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
   let storyHistory = [];
+
+  function parseSelectedEngine() {
+    const val = engineSelect.value || "localhost";
+    if (val.startsWith("webgpu:")) {
+      return { mode: "webgpu", modelId: val.slice("webgpu:".length) };
+    }
+    return { mode: "localhost", modelId: null };
+  }
 
   function addMessage(html, type = "dm") {
     const div = document.createElement("div");
@@ -1110,27 +1375,32 @@ Core Rules:
   }
 
   initBtn.addEventListener("click", async () => {
-    refreshBuilderUI();
-    activeMode = engineSelect.value;
+    const selection = parseSelectedEngine();
+    activeMode = selection.mode;
+    activeModelId = selection.modelId;
     initBtn.disabled = true;
 
     if (activeMode === "webgpu") {
       try {
-        statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B...";
-        if (!mlcEngine) {
-          mlcEngine = await webllm.CreateMLCEngine(
-            "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
-            { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
-          );
+        if (!mlcEngine || loadedModelId !== activeModelId) {
+          statusEl.textContent = `Loading ${activeModelId}...`;
+          mlcEngine = await webllm.CreateMLCEngine(activeModelId, {
+            initProgressCallback: (r) => { statusEl.textContent = r.text; }
+          });
+          loadedModelId = activeModelId;
         }
-        statusEl.textContent = "On-Device WebGPU Ready (100% Offline)";
+        statusEl.textContent = `Ready (${activeModelId.split("-Instruct")[0]}) — 100% Offline`;
         startGame();
       } catch (err) {
         statusEl.textContent = "WebGPU Error: " + err.message;
+        mlcEngine = null;
+        loadedModelId = null;
+      } finally {
         initBtn.disabled = false;
       }
     } else {
       statusEl.textContent = "Connected to Localhost Server (127.0.0.1:8080)";
+      initBtn.disabled = false;
       startGame();
     }
   });
@@ -1149,16 +1419,15 @@ Core Rules:
     }
   }
 
-    async function callLLM(messages, jsonMode = false) {
+  async function callLLM(messages, jsonMode = false, retryCount = 0) {
     if (activeMode === "webgpu") {
       try {
-        // Check if engine was disposed by Safari and reload if needed
-        if (!mlcEngine) {
-          statusEl.textContent = "Reloading WebGPU model after memory reset...";
-          mlcEngine = await webllm.CreateMLCEngine(
-            "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
-            { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
-          );
+        if (!mlcEngine || loadedModelId !== activeModelId) {
+          statusEl.textContent = `Reloading ${activeModelId}...`;
+          mlcEngine = await webllm.CreateMLCEngine(activeModelId, {
+            initProgressCallback: (r) => { statusEl.textContent = r.text; }
+          });
+          loadedModelId = activeModelId;
         }
         const reply = await mlcEngine.chat.completions.create({
           messages,
@@ -1167,11 +1436,11 @@ Core Rules:
         });
         return reply.choices[0].message.content;
       } catch (err) {
-        // If engine was disposed, reset reference and force reload on retry
-        if (err.message.includes("disposed") || err.message.includes("not loaded")) {
+        if (retryCount < 1 && (err.message.includes("disposed") || err.message.includes("not loaded"))) {
           mlcEngine = null;
-          statusEl.textContent = "Memory refreshed. Retrying...";
-          return await callLLM(messages, jsonMode); // Auto-retry once
+          loadedModelId = null;
+          statusEl.textContent = "WebGPU memory refreshed. Retrying...";
+          return await callLLM(messages, jsonMode, retryCount + 1);
         }
         throw err;
       }
@@ -1185,6 +1454,7 @@ Core Rules:
           max_tokens: jsonMode ? 120 : 280
         })
       });
+      if (!res.ok) throw new Error(`Localhost HTTP ${res.status}`);
       const data = await res.json();
       return data.choices[0].message.content;
     }
@@ -1197,17 +1467,18 @@ Core Rules:
     inputEl.value = "";
     inputEl.disabled = true;
     sendBtn.disabled = true;
-    inputEl.blur();
+    if (hwProfile.deviceClass === "mobile") inputEl.blur();
     addMessage(`<strong>${player.name}:</strong> ${action}`, "player");
 
     try {
       const lowerAction = action.toLowerCase();
-      const isQuestion = lowerAction.includes("?") || 
-                         lowerAction.startsWith("who") || 
-                         lowerAction.startsWith("what") || 
-                         lowerAction.startsWith("where") || 
-                         lowerAction.startsWith("why") || 
-                         lowerAction.startsWith("is") || 
+      const isQuestion = lowerAction.includes("?") ||
+                         lowerAction.startsWith("who") ||
+                         lowerAction.startsWith("what") ||
+                         lowerAction.startsWith("where") ||
+                         lowerAction.startsWith("why") ||
+                         lowerAction.startsWith("is ") ||
+                         lowerAction.startsWith("are ") ||
                          lowerAction.startsWith("can i see") ||
                          lowerAction.startsWith("look");
 
@@ -1289,6 +1560,7 @@ Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false if n
     } finally {
       inputEl.disabled = false;
       sendBtn.disabled = false;
+      if (hwProfile.deviceClass === "desktop") inputEl.focus();
     }
   }
 
@@ -1297,6 +1569,8 @@ Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false if n
     if (e.key === "Enter") handleTurn();
   });
 
+  // Boot sequence
+  initHardwareAndModels();
   refreshBuilderUI();
 </script>
 </body>
