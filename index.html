@@ -541,7 +541,10 @@
           </div>
           <div class="field-group">
             <label class="field-label" for="char-name">Character Name</label>
-            <input type="text" id="char-name" value="Aelar" placeholder="Enter character name..." />
+            <div class="grid-split">
+              <input type="text" id="char-name" value="Aelar" placeholder="Enter character name..." />
+              <button type="button" class="secondary" id="random-name-btn">🎲 Roll Name</button>
+            </div>
           </div>
           <div class="grid-2">
             <div class="field-group">
@@ -987,6 +990,56 @@
   const alignSelect = document.getElementById("align-select");
   const dmgToneSelect = document.getElementById("dmg-tone-select");
   const charNameInput = document.getElementById("char-name");
+  const RACE_NAMES = {
+    "Human": {
+      first: ["Aelar", "Bram", "Darian", "Elara", "Garrick", "Helena", "Kaelen", "Lyra", "Merek", "Rowan", "Sera", "Talia"],
+      last: ["Ashford", "Blackwood", "Crest", "Dorn", "Fairwind", "Hawke", "Mercer", "Storm", "Thorne", "Vane"]
+    },
+    "Elf (High/Wood)": {
+      first: ["Adran", "Aelar", "Aramil", "Caelynn", "Enna", "Galinndan", "Keyleth", "Lia", "Quarion", "Sariel", "Theren", "Valanthe"],
+      last: ["Amastacia", "Galanodel", "Holimion", "Liadon", "Meliamne", "Naïlo", "Siannodel", "Xiloscient"]
+    },
+    "Dwarf (Mountain/Hill)": {
+      first: ["Adrik", "Baern", "Barendd", "Dagnal", "Eberk", "Falkrunn", "Helja", "Kildrak", "Mardred", "Orsik", "Torgga", "Vondal"],
+      last: ["Balderk", "Dankil", "Frostbeard", "Gorunn", "Holderhek", "Ironfist", "Loderr", "Rumnaheim", "Torunn"]
+    },
+    "Halfling": {
+      first: ["Alton", "Bree", "Cade", "Callie", "Corrin", "Eldon", "Lavinia", "Lyle", "Merla", "Milo", "Osborn", "Rosie"],
+      last: ["Brushgather", "Goodbarrel", "Greenbottle", "High-Hill", "Hilltopple", "Leagallow", "Tealeaf", "Thorngage", "Tosscobble"]
+    },
+    "Dragonborn": {
+      first: ["Arjhan", "Balasar", "Bharash", "Donaar", "Ghesh", "Kava", "Korinn", "Medrash", "Mishann", "Nala", "Rhogar", "Sora"],
+      last: ["Clethtinthiallor", "Daardendrian", "Delmirev", "Drachedandion", "Fenkenkabradon", "Kerrhylon", "Myastan", "Turnuroth"]
+    },
+    "Gnome": {
+      first: ["Alston", "Bimpnottin", "Boddynock", "Breena", "Dimble", "Ellyjobell", "Fonkin", "Nissa", "Oda", "Sindri", "Warryn", "Zook"],
+      last: ["Beren", "Daergel", "Folkor", "Garrick", "Nackle", "Murnig", "Ningel", "Raulnor", "Scheppen", "Timbers"]
+    },
+    "Half-Elf": {
+      first: ["Aeliana", "Caelum", "Corvus", "Elowen", "Faelar", "Kael", "Lirael", "Mirelle", "Sylvar", "Thalia", "Vaelen"],
+      last: ["Amakir", "Brightwood", "Duskwalker", "Galanodel", "Silverleaf", "Starbreeze", "Windrunner"]
+    },
+    "Half-Orc": {
+      first: ["Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Lleyana", "Mhurren", "Neega", "Ront", "Shautha", "Vola"],
+      last: ["Bloodtusk", "Doomhammer", "Ironjaw", "Redfang", "Skullcleaver", "Stonefist", "Wolfborn"]
+    },
+    "Tiefling": {
+      first: ["Akmenos", "Amnon", "Barakas", "Damakos", "Kallista", "Lerissa", "Makaria", "Mordai", "Nemeia", "Orianna", "Therai"],
+      last: ["Carrion", "Creed", "Despair", "Excellence", "Fear", "Glory", "Hope", "Ideal", "Reverence", "Sorrow", "Torment"]
+    }
+  };
+
+  document.getElementById("random-name-btn").addEventListener("click", () => {
+    const pool = RACE_NAMES[raceSelect.value] || RACE_NAMES["Human"];
+    let nextName = charNameInput.value;
+    for (let i = 0; i < 5 && nextName === charNameInput.value; i++) {
+      const first = pool.first[Math.floor(Math.random() * pool.first.length)];
+      const last = pool.last[Math.floor(Math.random() * pool.last.length)];
+      nextName = `${first} ${last}`;
+    }
+    charNameInput.value = nextName;
+    refreshBuilderUI();
+  });
   const statMethodSelect = document.getElementById("stat-method-select");
   const rerollBtn = document.getElementById("reroll-btn");
   const statsGrid = document.getElementById("stats-grid");
