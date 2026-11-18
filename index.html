@@ -16,6 +16,7 @@
       --text: #eceae5;
       --muted: #9498a6;
       --cyan: #5bc0be;
+      --success: #66bb6a;
     }
 
     *, *::before, *::after {
@@ -35,7 +36,6 @@
       -webkit-text-size-adjust: 100%;
     }
 
-    /* Universal Viewport Wrapper: adapts to Mobile Safari, iPad Split-View, and Desktop */
     #app-wrapper {
       position: fixed;
       inset: 0;
@@ -62,18 +62,17 @@
     header {
       background: var(--panel);
       padding-top: max(10px, env(safe-area-inset-top));
-      padding-bottom: 10px;
+      padding-bottom: 8px;
       padding-left: max(12px, env(safe-area-inset-left));
       padding-right: max(12px, env(safe-area-inset-right));
       border-bottom: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
       overflow: hidden;
     }
 
-    /* Top HUD Row */
     .hud-top {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -86,7 +85,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       min-width: 0;
     }
 
@@ -95,7 +94,7 @@
       border: 1px solid var(--border);
       padding: 4px 8px;
       border-radius: 6px;
-      font-size: clamp(11px, 2.8vw, 13px);
+      font-size: clamp(11px, 2.7vw, 13px);
       font-weight: 600;
       white-space: nowrap;
     }
@@ -113,14 +112,13 @@
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 6px 10px;
-      font-size: clamp(11px, 2.8vw, 13px);
+      padding: 5px 9px;
+      font-size: clamp(11px, 2.7vw, 13px);
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
 
-    /* Setup & Gear Panels */
     .panel-box {
       background: var(--card);
       border: 1px solid var(--border);
@@ -128,21 +126,110 @@
       padding: 8px;
       display: flex;
       flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      max-height: 45vh;
+      overflow-y: auto;
+    }
+    .panel-box.hidden { display: none; }
+
+    .info-text {
+      font-size: clamp(11px, 2.7vw, 13px);
+      line-height: 1.4;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .info-text strong { color: var(--accent); }
+
+    #status-banner {
+      font-size: clamp(11px, 2.5vw, 12px);
+      color: var(--muted);
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Main Content Area: Holds either the Character Builder Wizard or the Story Log */
+    #main-area {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: clamp(10px, 2.8vw, 18px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Character Creation Wizard Styles */
+    #char-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    #char-builder.hidden { display: none; }
+
+    .wizard-step {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .wizard-step.hidden { display: none; }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    .step-title {
+      font-size: clamp(14px, 3.6vw, 16px);
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .step-badge {
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--card);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+    }
+    .field-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
       width: 100%;
     }
-    .panel-box.hidden {
-      display: none;
-    }
 
-    /* CSS Grid strictly prevents <select> from overflowing on Safari */
-    .grid-row-full {
+    .grid-3 {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
       width: 100%;
     }
 
-    .grid-row-split {
+    .grid-split {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
@@ -159,7 +246,7 @@
       color: var(--text);
     }
 
-    select {
+    select, input[type="text"] {
       width: 100%;
       min-width: 0;
       max-width: 100%;
@@ -169,49 +256,101 @@
       white-space: nowrap;
     }
 
+    button {
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
     button.primary {
       background: var(--accent);
       color: #111;
       font-weight: 700;
       border: none;
-      padding: 9px 14px;
-      cursor: pointer;
-      white-space: nowrap;
+    }
+    button.secondary {
+      background: var(--card);
+      color: var(--text);
     }
     button:disabled {
       opacity: 0.45;
       cursor: not-allowed;
     }
 
-    .info-text {
-      font-size: clamp(12px, 2.8vw, 13px);
-      line-height: 1.4;
-      color: var(--text);
-      overflow-wrap: anywhere;
+    .stat-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+      text-align: center;
     }
-    .info-text strong { color: var(--accent); }
-
-    #status-banner {
-      font-size: clamp(11px, 2.6vw, 12px);
-      color: var(--muted);
+    .stat-box .stat-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-box .stat-final {
+      font-size: 13px;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+    .stat-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      justify-content: center;
+    }
+    .stat-controls button {
+      padding: 3px 8px;
+      font-size: 13px;
     }
 
-    /* Main Scrollable Story Log */
-    #story-log {
-      width: 100%;
-      height: 100%;
+    .skill-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      max-height: 210px;
       overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: clamp(12px, 3vw, 20px);
+      padding: 4px;
+      background: #12141c;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 5px 6px;
+      background: var(--card);
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .skill-item input { accent-color: var(--accent); }
+    .skill-item.locked {
+      border: 1px solid rgba(229, 169, 60, 0.45);
+      color: var(--accent);
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    /* Story Log Messages */
+    #story-log {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      width: 100%;
     }
+    #story-log.hidden { display: none; }
 
     .msg {
       line-height: 1.5;
@@ -245,7 +384,6 @@
       font-style: italic;
     }
 
-    /* Bottom Action Bar */
     footer {
       background: var(--panel);
       padding-top: 8px;
@@ -264,7 +402,7 @@
       width: 100%;
       min-width: 0;
       padding: 10px 12px;
-      font-size: 16px; /* Prevents iOS auto-zoom on focus */
+      font-size: 16px;
     }
   </style>
 </head>
@@ -275,48 +413,150 @@
     <header>
       <div class="hud-top">
         <div class="stat-pills">
-          <span class="pill accent" id="class-pill">Lv.1 Fighter</span>
-          <span class="pill hp" id="hp-pill">HP 12/12</span>
-          <span class="pill ac" id="ac-pill">AC 16</span>
+          <span class="pill accent" id="class-pill">Character Builder</span>
+          <span class="pill hp" id="hp-pill">HP --/--</span>
+          <span class="pill ac" id="ac-pill">AC --</span>
         </div>
         <div class="hud-buttons">
-          <button class="btn-small" id="gear-btn" type="button">Sheet</button>
-          <button class="btn-small" id="setup-btn" type="button">Setup ▾</button>
+          <button class="btn-small" id="sheet-btn" type="button">Sheet</button>
+          <button class="btn-small" id="builder-toggle-btn" type="button">Creator</button>
         </div>
       </div>
 
-      <!-- Character Sheet & Inventory Drawer -->
-      <div class="panel-box hidden" id="gear-panel">
-        <div class="info-text" id="stats-detail"></div>
-        <div class="info-text" id="gear-detail"></div>
+      <!-- Full Character Sheet Drawer -->
+      <div class="panel-box hidden" id="sheet-panel">
+        <div class="info-text" id="sheet-identity"></div>
+        <div class="info-text" id="sheet-stats"></div>
+        <div class="info-text" id="sheet-skills"></div>
+        <div class="info-text" id="sheet-gear"></div>
       </div>
 
-      <!-- AI & Class Setup Panel -->
-      <div class="panel-box" id="setup-panel">
-        <div class="grid-row-full">
-          <select id="class-select">
-            <option value="Fighter">Class: Lv.1 Fighter (Longsword & Shield)</option>
-            <option value="Rogue">Class: Lv.1 Rogue (Shortbow & Tools)</option>
-            <option value="Wizard">Class: Lv.1 Wizard (Spellbook & Staff)</option>
-            <option value="Cleric">Class: Lv.1 Cleric (Mace & Holy Symbol)</option>
-          </select>
-        </div>
-        <div class="grid-row-split">
-          <select id="engine-select">
-            <option value="webgpu">AI: On-Device WebGPU (Qwen 1.5B)</option>
-            <option value="localhost">AI: Localhost App (127.0.0.1:8080)</option>
-          </select>
-          <button id="init-btn" class="primary" type="button">Start 5e</button>
-        </div>
-      </div>
-
-      <div id="status-banner">[v2.0 Universal] Pick class & tap "Start 5e" to load AI.</div>
+      <div id="status-banner">[v3.0 PHB/DMG Builder] Complete steps 1–4 to begin your adventure.</div>
     </header>
 
-    <main id="story-log"></main>
+    <main id="main-area">
+      <!-- 4-STEP PHB & DMG CHARACTER CREATION WIZARD -->
+      <section id="char-builder">
+
+        <!-- STEP 1: IDENTITY, PHB RACE, & PHB CLASS -->
+        <div class="wizard-step" id="step-1">
+          <div class="step-header">
+            <span class="step-title">1. PHB Race & Class</span>
+            <span class="step-badge">Step 1 of 4</span>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="char-name">Character Name</label>
+            <input type="text" id="char-name" value="Aelar" placeholder="Enter character name..." />
+          </div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label" for="race-select">PHB Race (Species)</label>
+              <select id="race-select"></select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="class-select">PHB Class</label>
+              <select id="class-select"></select>
+            </div>
+          </div>
+          <div class="info-text" id="race-class-preview"></div>
+          <div class="nav-row">
+            <span></span>
+            <button type="button" class="primary" id="to-step-2">Next: Background & DMG &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: PHB BACKGROUND, ALIGNMENT, & DMG CAMPAIGN FLAVOR -->
+        <div class="wizard-step hidden" id="step-2">
+          <div class="step-header">
+            <span class="step-title">2. PHB Background & DMG Tone</span>
+            <span class="step-badge">Step 2 of 4</span>
+          </div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label" for="bg-select">PHB Background</label>
+              <select id="bg-select"></select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="align-select">Alignment</label>
+              <select id="align-select">
+                <option value="Lawful Good">Lawful Good</option>
+                <option value="Neutral Good" selected>Neutral Good</option>
+                <option value="Chaotic Good">Chaotic Good</option>
+                <option value="Lawful Neutral">Lawful Neutral</option>
+                <option value="True Neutral">True Neutral</option>
+                <option value="Chaotic Neutral">Chaotic Neutral</option>
+                <option value="Lawful Evil">Lawful Evil</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="dmg-tone-select">DMG Campaign Flavor (Dungeon Master's Guide Ch. 1)</label>
+            <select id="dmg-tone-select">
+              <option value="Heroic Fantasy">Heroic Fantasy (Classic High Adventure & Dungeon Delving)</option>
+              <option value="Sword and Sorcery">Sword & Sorcery (Gritty, Dangerous Low-Magic World)</option>
+              <option value="Epic Fantasy">Epic Fantasy (High-Stakes Conflict Against Ancient Evil)</option>
+              <option value="Intrigue and Mystery">Intrigue & Mystery (Political Factions, Guilds & Investigation)</option>
+            </select>
+          </div>
+          <div class="info-text" id="bg-preview"></div>
+          <div class="nav-row">
+            <button type="button" class="secondary" id="back-step-1">&larr; Back</button>
+            <button type="button" class="primary" id="to-step-3">Next: Ability Scores &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: PHB / DMG ABILITY SCORE GENERATION -->
+        <div class="wizard-step hidden" id="step-3">
+          <div class="step-header">
+            <span class="step-title">3. Ability Scores (PHB Ch. 1)</span>
+            <span class="step-badge" id="stat-method-badge">Standard Array</span>
+          </div>
+          <div class="grid-split">
+            <select id="stat-method-select">
+              <option value="array">Method: Standard Array (15, 14, 13, 12, 10, 8)</option>
+              <option value="pointbuy">Method: 27-Point Buy (PHB Variant)</option>
+              <option value="roll">Method: Roll 4d6 Drop Lowest</option>
+            </select>
+            <button type="button" class="secondary" id="reroll-btn">Reset / Roll</button>
+          </div>
+          <div class="grid-3" id="stats-grid"></div>
+          <div class="info-text" id="derived-combat-preview"></div>
+          <div class="nav-row">
+            <button type="button" class="secondary" id="back-step-2">&larr; Back</button>
+            <button type="button" class="primary" id="to-step-4">Next: Skills & AI &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: PHB SKILL PROFICIENCIES, GEAR, & LAUNCH AI -->
+        <div class="wizard-step hidden" id="step-4">
+          <div class="step-header">
+            <span class="step-title">4. Skills, Gear & Launch</span>
+            <span class="step-badge" id="skill-counter-badge">Pick Skills</span>
+          </div>
+          <div class="field-label">Select Class Skill Proficiencies (+2 Prof. Bonus at Lv. 1):</div>
+          <div class="skill-grid" id="skill-grid"></div>
+          <div class="info-text" id="gear-preview"></div>
+          <div class="grid-split">
+            <select id="engine-select">
+              <option value="webgpu">AI: On-Device WebGPU (Qwen 1.5B)</option>
+              <option value="localhost">AI: Localhost App (127.0.0.1:8080)</option>
+            </select>
+            <button type="button" class="primary" id="init-btn">Begin Campaign</button>
+          </div>
+          <div class="nav-row">
+            <button type="button" class="secondary" id="back-step-3">&larr; Back</button>
+            <span></span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- STORY LOG -->
+      <section id="story-log" class="hidden"></section>
+    </main>
 
     <footer>
-      <input type="text" id="player-input" placeholder="What do you do?" autocomplete="off" disabled />
+      <input type="text" id="player-input" placeholder="Complete character creation above..." autocomplete="off" disabled />
       <button id="send-btn" class="primary" type="button" disabled>Act</button>
     </footer>
   </div>
@@ -325,10 +565,9 @@
 <script type="module">
   import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-  // 0. UNIVERSAL VIEWPORT TRACKER (Handles iOS Safari Bars, iPad Split-View, & Desktop)
+  // 0. UNIVERSAL VIEWPORT SIZING
   const wrapper = document.getElementById("app-wrapper");
-  const logEl = document.getElementById("story-log");
-
+  const mainArea = document.getElementById("main-area");
   function updateViewportSize() {
     if (window.visualViewport) {
       wrapper.style.height = `${window.visualViewport.height}px`;
@@ -337,7 +576,6 @@
       wrapper.style.height = `${window.innerHeight}px`;
       wrapper.style.top = "0px";
     }
-    logEl.scrollTop = logEl.scrollHeight;
   }
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", updateViewportSize);
@@ -346,137 +584,486 @@
   window.addEventListener("resize", updateViewportSize);
   updateViewportSize();
 
-  // 1. VANILLA D&D 5e SRD CLASSES
+  // 1. PHB DATA TABLES (RACES, CLASSES, BACKGROUNDS, SKILLS)
+  const STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+
+  const SKILLS = {
+    "Acrobatics": "DEX", "Animal Handling": "WIS", "Arcana": "INT", "Athletics": "STR",
+    "Deception": "CHA", "History": "INT", "Insight": "WIS", "Intimidation": "CHA",
+    "Investigation": "INT", "Medicine": "WIS", "Nature": "INT", "Perception": "WIS",
+    "Performance": "CHA", "Persuasion": "CHA", "Religion": "INT", "Sleight of Hand": "DEX",
+    "Stealth": "DEX", "Survival": "WIS"
+  };
+
+  const RACES = {
+    "Human": { bonuses: { STR:1, DEX:1, CON:1, INT:1, WIS:1, CHA:1 }, traits: "Versatile (+1 to all Ability Scores, Speed 30ft)" },
+    "Elf (High/Wood)": { bonuses: { DEX:2, INT:1 }, traits: "Darkvision 60ft, Keen Senses, Fey Ancestry (+2 DEX, +1 INT)" },
+    "Dwarf (Mountain/Hill)": { bonuses: { CON:2, WIS:1 }, traits: "Darkvision 60ft, Dwarven Resilience vs Poison (+2 CON, +1 WIS)" },
+    "Halfling": { bonuses: { DEX:2, CHA:1 }, traits: "Lucky (reroll 1s), Brave, Halfling Nimbleness (+2 DEX, +1 CHA)" },
+    "Dragonborn": { bonuses: { STR:2, CHA:1 }, traits: "Draconic Ancestry, Breath Weapon, Damage Resistance (+2 STR, +1 CHA)" },
+    "Gnome": { bonuses: { INT:2, CON:1 }, traits: "Darkvision 60ft, Gnome Cunning vs Magic (+2 INT, +1 CON)" },
+    "Half-Elf": { bonuses: { CHA:2, DEX:1, WIS:1 }, traits: "Darkvision 60ft, Fey Ancestry (+2 CHA, +1 DEX, +1 WIS)" },
+    "Half-Orc": { bonuses: { STR:2, CON:1 }, traits: "Darkvision 60ft, Relentless Endurance, Savage Attacks (+2 STR, +1 CON)" },
+    "Tiefling": { bonuses: { CHA:2, INT:1 }, traits: "Darkvision 60ft, Hellish Resistance (Fire), Infernal Legacy (+2 CHA, +1 INT)" }
+  };
+
   const CLASSES = {
-    Fighter: {
-      className: "Fighter", hp: 12, maxHp: 12, ac: 16,
-      stats: { STR: 16, DEX: 12, CON: 14, INT: 10, WIS: 12, CHA: 10 },
-      inventory: ["Longsword", "Chain Mail", "Shield", "Potion of Healing", "50ft Rope"]
+    "Barbarian": {
+      hitDie: 12, saves: ["STR", "CON"], skillCount: 2,
+      skillPool: ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"],
+      gear: ["Greataxe", "2 Handaxes", "Explorer's Pack", "Potion of Healing"],
+      calcAc: (m) => 10 + m.DEX + m.CON // Unarmored Defense
     },
-    Rogue: {
-      className: "Rogue", hp: 10, maxHp: 10, ac: 14,
-      stats: { STR: 10, DEX: 16, CON: 14, INT: 12, WIS: 10, CHA: 14 },
-      inventory: ["Shortsword", "Shortbow", "Thieves' Tools", "Potion of Healing", "Leather Armor"]
+    "Bard": {
+      hitDie: 8, saves: ["DEX", "CHA"], skillCount: 3,
+      skillPool: Object.keys(SKILLS),
+      gear: ["Rapier", "Lute", "Leather Armor", "Spells (Vicious Mockery, Healing Word, Charm Person)", "Potion of Healing"],
+      calcAc: (m) => 11 + m.DEX
     },
-    Wizard: {
-      className: "Wizard", hp: 8, maxHp: 8, ac: 12,
-      stats: { STR: 8, DEX: 14, CON: 14, INT: 16, WIS: 12, CHA: 10 },
-      inventory: ["Quarterstaff", "Spellbook (Fire Bolt, Magic Missile, Shield)", "Potion of Healing"]
+    "Cleric": {
+      hitDie: 8, saves: ["WIS", "CHA"], skillCount: 2,
+      skillPool: ["History", "Insight", "Medicine", "Persuasion", "Religion"],
+      gear: ["Mace", "Scale Mail", "Shield", "Holy Symbol", "Spells (Sacred Flame, Cure Wounds, Guiding Bolt)", "Potion of Healing"],
+      calcAc: (m) => 14 + Math.min(2, m.DEX) + 2
     },
-    Cleric: {
-      className: "Cleric", hp: 10, maxHp: 10, ac: 16,
-      stats: { STR: 14, DEX: 10, CON: 14, INT: 10, WIS: 16, CHA: 12 },
-      inventory: ["Mace", "Scale Mail", "Holy Symbol (Cure Wounds, Guiding Bolt)", "Potion of Healing"]
+    "Druid": {
+      hitDie: 8, saves: ["INT", "WIS"], skillCount: 2,
+      skillPool: ["Arcana", "Animal Handling", "Insight", "Medicine", "Nature", "Perception", "Religion", "Survival"],
+      gear: ["Quarterstaff", "Leather Armor", "Wooden Shield", "Druidic Focus", "Spells (Shillelagh, Entangle, Cure Wounds)", "Potion of Healing"],
+      calcAc: (m) => 11 + m.DEX + 2
+    },
+    "Fighter": {
+      hitDie: 10, saves: ["STR", "CON"], skillCount: 2,
+      skillPool: ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"],
+      gear: ["Longsword", "Shield", "Chain Mail", "Light Crossbow", "Potion of Healing"],
+      calcAc: () => 18 // Chain Mail (16) + Shield (+2)
+    },
+    "Monk": {
+      hitDie: 8, saves: ["STR", "DEX"], skillCount: 2,
+      skillPool: ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"],
+      gear: ["Shortsword", "10 Darts", "Explorer's Pack", "Potion of Healing"],
+      calcAc: (m) => 10 + m.DEX + m.WIS // Unarmored Defense
+    },
+    "Paladin": {
+      hitDie: 10, saves: ["WIS", "CHA"], skillCount: 2,
+      skillPool: ["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"],
+      gear: ["Longsword", "Shield", "Chain Mail", "Holy Symbol (Lay on Hands 5 HP, Divine Sense)", "Potion of Healing"],
+      calcAc: () => 18
+    },
+    "Ranger": {
+      hitDie: 10, saves: ["STR", "DEX"], skillCount: 3,
+      skillPool: ["Animal Handling", "Athletics", "Insight", "Investigation", "Nature", "Perception", "Stealth", "Survival"],
+      gear: ["Longbow", "2 Shortswords", "Scale Mail", "Explorer's Pack", "Potion of Healing"],
+      calcAc: (m) => 14 + Math.min(2, m.DEX)
+    },
+    "Rogue": {
+      hitDie: 8, saves: ["DEX", "INT"], skillCount: 4,
+      skillPool: ["Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Performance", "Persuasion", "Sleight of Hand", "Stealth"],
+      gear: ["Shortsword", "Shortbow", "2 Daggers", "Thieves' Tools", "Leather Armor", "Potion of Healing"],
+      calcAc: (m) => 11 + m.DEX
+    },
+    "Sorcerer": {
+      hitDie: 6, saves: ["CON", "CHA"], skillCount: 2,
+      skillPool: ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"],
+      gear: ["Light Crossbow", "Arcane Focus", "2 Daggers", "Spells (Fire Bolt, Magic Missile, Burning Hands)", "Potion of Healing"],
+      calcAc: (m) => 13 + m.DEX // Draconic Resilience / Mage Armor baseline
+    },
+    "Warlock": {
+      hitDie: 8, saves: ["WIS", "CHA"], skillCount: 2,
+      skillPool: ["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"],
+      gear: ["Light Crossbow", "Leather Armor", "Arcane Focus", "Spells (Eldritch Blast, Hex, Armor of Agathys)", "Potion of Healing"],
+      calcAc: (m) => 11 + m.DEX
+    },
+    "Wizard": {
+      hitDie: 6, saves: ["INT", "WIS"], skillCount: 2,
+      skillPool: ["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"],
+      gear: ["Quarterstaff", "Spellbook", "Arcane Focus", "Spells (Fire Bolt, Mage Hand, Magic Missile, Shield, Mage Armor)", "Potion of Healing"],
+      calcAc: (m) => 12 + m.DEX
     }
   };
 
-  let player = {
-    ...structuredClone(CLASSES.Fighter),
-    getMod(stat) {
-      const score = this.stats[stat] ?? 10;
-      return Math.floor((score - 10) / 2);
+  const BACKGROUNDS = {
+    "Soldier": { skills: ["Athletics", "Intimidation"], feature: "Military Rank & insignia" },
+    "Criminal": { skills: ["Deception", "Stealth"], feature: "Criminal Contact & crowbar" },
+    "Folk Hero": { skills: ["Animal Handling", "Survival"], feature: "Rustic Hospitality" },
+    "Sage": { skills: ["Arcana", "History"], feature: "Researcher & lore letters" },
+    "Acolyte": { skills: ["Insight", "Religion"], feature: "Shelter of the Faithful" },
+    "Noble": { skills: ["History", "Persuasion"], feature: "Position of Privilege & signet ring" },
+    "Outlander": { skills: ["Athletics", "Survival"], feature: "Wanderer (map & foraging memory)" },
+    "Urchin": { skills: ["Sleight of Hand", "Stealth"], feature: "City Secrets & pet mouse" }
+  };
+
+  const POINT_COSTS = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
+  const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+
+  // 2. ACTIVE PLAYER CHARACTER OBJECT
+  const player = {
+    name: "Aelar",
+    race: "Human",
+    className: "Fighter",
+    background: "Soldier",
+    alignment: "Neutral Good",
+    dmgTone: "Heroic Fantasy",
+    level: 1,
+    profBonus: 2,
+    baseStats: { STR: 15, DEX: 13, CON: 14, INT: 10, WIS: 12, CHA: 8 },
+    chosenSkills: new Set(["Perception", "Survival"]),
+    hp: 12,
+    maxHp: 12,
+    ac: 18,
+    inventory: [],
+
+    getFinalStat(stat) {
+      const base = this.baseStats[stat] ?? 10;
+      const racial = RACES[this.race]?.bonuses[stat] ?? 0;
+      return base + racial;
     },
-    rollD20(stat) {
+    getMod(stat) {
+      return Math.floor((this.getFinalStat(stat) - 10) / 2);
+    },
+    getAllProficientSkills() {
+      const bgSkills = BACKGROUNDS[this.background]?.skills ?? [];
+      return Array.from(new Set([...bgSkills, ...this.chosenSkills]));
+    },
+    isSkillProficient(skillName) {
+      if (!skillName) return false;
+      const lower = skillName.toLowerCase();
+      return this.getAllProficientSkills().some(s => lower.includes(s.toLowerCase()));
+    },
+    recalculate() {
+      const cls = CLASSES[this.className];
+      const mods = {};
+      STATS.forEach(s => { mods[s] = this.getMod(s); });
+      this.maxHp = Math.max(1, cls.hitDie + mods.CON);
+      this.hp = this.maxHp;
+      this.ac = cls.calcAc(mods);
+      this.inventory = [...cls.gear];
+    },
+    rollD20(stat, skillName = "") {
       const nat = Math.floor(Math.random() * 20) + 1;
       const mod = this.getMod(stat);
-      return { nat, mod, total: nat + mod, isCrit: nat === 20, isFumble: nat === 1 };
+      const isProf = this.isSkillProficient(skillName);
+      const prof = isProf ? this.profBonus : 0;
+      return { nat, mod, prof, isProf, total: nat + mod + prof, isCrit: nat === 20, isFumble: nat === 1 };
     },
     summary() {
-      return `Lv.1 ${this.className} | HP: ${this.hp}/${this.maxHp} | AC: ${this.ac} | Gear: ${this.inventory.join(", ")}`;
+      return `${this.name} (Lv.1 ${this.race} ${this.className}, ${this.background}) | HP: ${this.hp}/${this.maxHp} | AC: ${this.ac} | Skills: ${this.getAllProficientSkills().join(", ")} | Gear: ${this.inventory.join(", ")}`;
     }
   };
 
-  // 2. VANILLA D&D 5e PROMPTS
-  const INTENT_PROMPT = `You are a Dungeons & Dragons 5th Edition (5e SRD) Rules Arbiter.
-Evaluate the player's action against the current scene and their 5e class/inventory.
-Reply ONLY with a raw JSON object matching this exact schema:
-{"requires_roll":true,"stat":"DEX","skill_name":"Stealth","dc":12,"item_consumed":"","impossible_reason":""}
-Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false and dc to 0 if no check is needed.`;
-
-  const NARRATOR_PROMPT = `You are a classic high-fantasy Dungeons & Dragons 5e Dungeon Master.
-Run a traditional 5e adventure (taverns, roadside goblin ambushes, dungeons, dragons, and loot).
-Keep responses clear, engaging, and concise (maximum 2 short paragraphs).
-Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
-End by asking the player what they do next.`;
+  // 3. UI REFERENCES & WIZARD INITIALIZATION
+  const raceSelect = document.getElementById("race-select");
+  const classSelect = document.getElementById("class-select");
+  const bgSelect = document.getElementById("bg-select");
+  const alignSelect = document.getElementById("align-select");
+  const dmgToneSelect = document.getElementById("dmg-tone-select");
+  const charNameInput = document.getElementById("char-name");
+  const statMethodSelect = document.getElementById("stat-method-select");
+  const rerollBtn = document.getElementById("reroll-btn");
+  const statsGrid = document.getElementById("stats-grid");
+  const skillGrid = document.getElementById("skill-grid");
 
   const statusEl = document.getElementById("status-banner");
+  const logEl = document.getElementById("story-log");
+  const builderEl = document.getElementById("char-builder");
   const inputEl = document.getElementById("player-input");
   const sendBtn = document.getElementById("send-btn");
   const initBtn = document.getElementById("init-btn");
   const engineSelect = document.getElementById("engine-select");
-  const classSelect = document.getElementById("class-select");
 
-  const classPill = document.getElementById("class-pill");
-  const hpPill = document.getElementById("hp-pill");
-  const acPill = document.getElementById("ac-pill");
-  const statsDetail = document.getElementById("stats-detail");
-  const gearDetail = document.getElementById("gear-detail");
-  const gearPanel = document.getElementById("gear-panel");
-  const setupPanel = document.getElementById("setup-panel");
-  const gearBtn = document.getElementById("gear-btn");
-  const setupBtn = document.getElementById("setup-btn");
+  // Populate dropdowns
+  Object.keys(RACES).forEach(r => {
+    const opt = document.createElement("option");
+    opt.value = r; opt.textContent = r;
+    raceSelect.appendChild(opt);
+  });
+  Object.keys(CLASSES).forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = `${c} (d${CLASSES[c].hitDie})`;
+    if (c === "Fighter") opt.selected = true;
+    classSelect.appendChild(opt);
+  });
+  Object.keys(BACKGROUNDS).forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b; opt.textContent = b;
+    bgSelect.appendChild(opt);
+  });
+
+  function showStep(stepNum) {
+    [1, 2, 3, 4].forEach(n => {
+      document.getElementById(`step-${n}`).classList.toggle("hidden", n !== stepNum);
+    });
+    mainArea.scrollTop = 0;
+    refreshBuilderUI();
+  }
+
+  document.getElementById("to-step-2").addEventListener("click", () => showStep(2));
+  document.getElementById("back-step-1").addEventListener("click", () => showStep(1));
+  document.getElementById("to-step-3").addEventListener("click", () => showStep(3));
+  document.getElementById("back-step-2").addEventListener("click", () => showStep(2));
+  document.getElementById("to-step-4").addEventListener("click", () => showStep(4));
+  document.getElementById("back-step-3").addEventListener("click", () => showStep(3));
+
+  // Drawer toggles
+  const sheetPanel = document.getElementById("sheet-panel");
+  document.getElementById("sheet-btn").addEventListener("click", () => {
+    sheetPanel.classList.toggle("hidden");
+  });
+  document.getElementById("builder-toggle-btn").addEventListener("click", () => {
+    const isHidden = builderEl.classList.toggle("hidden");
+    logEl.classList.toggle("hidden", !isHidden);
+  });
+
+  // Ability Score Generation Logic
+  function applyStandardArray() {
+    STATS.forEach((s, i) => { player.baseStats[s] = STANDARD_ARRAY[i]; });
+  }
+  function applyPointBuyReset() {
+    STATS.forEach(s => { player.baseStats[s] = 10; });
+  }
+  function roll4d6DropLowest() {
+    STATS.forEach(s => {
+      const rolls = [1,2,3,4].map(() => Math.floor(Math.random() * 6) + 1).sort((a,b) => a - b);
+      player.baseStats[s] = rolls[1] + rolls[2] + rolls[3];
+    });
+  }
+
+  function getPointBuySpent() {
+    return STATS.reduce((sum, s) => sum + (POINT_COSTS[player.baseStats[s]] ?? 0), 0);
+  }
+
+  statMethodSelect.addEventListener("change", () => {
+    const m = statMethodSelect.value;
+    if (m === "array") applyStandardArray();
+    else if (m === "pointbuy") applyPointBuyReset();
+    else roll4d6DropLowest();
+    refreshBuilderUI();
+  });
+
+  rerollBtn.addEventListener("click", () => {
+    const m = statMethodSelect.value;
+    if (m === "array") applyStandardArray();
+    else if (m === "pointbuy") applyPointBuyReset();
+    else roll4d6DropLowest();
+    refreshBuilderUI();
+  });
+
+  function renderStatsGrid() {
+    statsGrid.innerHTML = "";
+    const method = statMethodSelect.value;
+    const spent = getPointBuySpent();
+    const badge = document.getElementById("stat-method-badge");
+    if (method === "pointbuy") badge.textContent = `Points: ${27 - spent} / 27 left`;
+    else if (method === "array") badge.textContent = "Standard Array (Swap)";
+    else badge.textContent = "Rolled 4d6 Drop Lowest";
+
+    STATS.forEach((stat, idx) => {
+      const box = document.createElement("div");
+      box.className = "stat-box";
+      const racial = RACES[player.race]?.bonuses[stat] ?? 0;
+      const finalVal = player.getFinalStat(stat);
+      const mod = player.getMod(stat);
+      const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+
+      let controlsHtml = "";
+      if (method === "pointbuy") {
+        controlsHtml = `
+          <div class="stat-controls">
+            <button type="button" data-stat="${stat}" data-dir="-1">-</button>
+            <span>${player.baseStats[stat]}</span>
+            <button type="button" data-stat="${stat}" data-dir="1">+</button>
+          </div>`;
+      } else {
+        const prevStat = STATS[(idx + 5) % 6];
+        const nextStat = STATS[(idx + 1) % 6];
+        controlsHtml = `
+          <div class="stat-controls">
+            <button type="button" data-swap="${stat}:${prevStat}" title="Swap left">&larr;</button>
+            <span>${player.baseStats[stat]}</span>
+            <button type="button" data-swap="${stat}:${nextStat}" title="Swap right">&rarr;</button>
+          </div>`;
+      }
+
+      box.innerHTML = `
+        <div class="stat-name">${stat} ${racial ? `(+${racial})` : ""}</div>
+        ${controlsHtml}
+        <div class="stat-final">Total: ${finalVal} (${modStr})</div>
+      `;
+      statsGrid.appendChild(box);
+    });
+
+    // Attach Point-Buy or Swap listeners
+    statsGrid.querySelectorAll("button[data-stat]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const s = btn.getAttribute("data-stat");
+        const dir = Number(btn.getAttribute("data-dir"));
+        const nextVal = player.baseStats[s] + dir;
+        if (nextVal < 8 || nextVal > 15) return;
+        const nextCost = getPointBuySpent() - POINT_COSTS[player.baseStats[s]] + POINT_COSTS[nextVal];
+        if (nextCost <= 27) {
+          player.baseStats[s] = nextVal;
+          refreshBuilderUI();
+        }
+      });
+    });
+
+    statsGrid.querySelectorAll("button[data-swap]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const [a, b] = btn.getAttribute("data-swap").split(":");
+        const tmp = player.baseStats[a];
+        player.baseStats[a] = player.baseStats[b];
+        player.baseStats[b] = tmp;
+        refreshBuilderUI();
+      });
+    });
+  }
+
+  function renderSkillGrid() {
+    skillGrid.innerHTML = "";
+    const cls = CLASSES[player.className];
+    const bgSkills = BACKGROUNDS[player.background].skills;
+
+    // Prune invalid chosen skills when class changes
+    Array.from(player.chosenSkills).forEach(sk => {
+      if (!cls.skillPool.includes(sk) || bgSkills.includes(sk)) {
+        player.chosenSkills.delete(sk);
+      }
+    });
+    // Auto-fill up to class skillCount if under-selected
+    for (const sk of cls.skillPool) {
+      if (player.chosenSkills.size >= cls.skillCount) break;
+      if (!bgSkills.includes(sk)) player.chosenSkills.add(sk);
+    }
+
+    document.getElementById("skill-counter-badge").textContent =
+      `Chosen: ${player.chosenSkills.size} / ${cls.skillCount} Class Skills`;
+
+    cls.skillPool.forEach(sk => {
+      const isBg = bgSkills.includes(sk);
+      const isChecked = isBg || player.chosenSkills.has(sk);
+      const label = document.createElement("label");
+      label.className = `skill-item ${isBg ? "locked" : ""}`;
+      label.innerHTML = `
+        <input type="checkbox" value="${sk}" ${isChecked ? "checked" : ""} ${isBg ? "disabled" : ""} />
+        <span>${sk} (${SKILLS[sk]})${isBg ? " [BG]" : ""}</span>
+      `;
+      const cb = label.querySelector("input");
+      cb.addEventListener("change", () => {
+        if (cb.checked) {
+          if (player.chosenSkills.size >= cls.skillCount) {
+            cb.checked = false;
+            return;
+          }
+          player.chosenSkills.add(sk);
+        } else {
+          player.chosenSkills.delete(sk);
+        }
+        refreshBuilderUI();
+      });
+      skillGrid.appendChild(label);
+    });
+  }
+
+  function refreshBuilderUI() {
+    player.name = charNameInput.value.trim() || "Adventurer";
+    player.race = raceSelect.value;
+    player.className = classSelect.value;
+    player.background = bgSelect.value;
+    player.alignment = alignSelect.value;
+    player.dmgTone = dmgToneSelect.value;
+    player.recalculate();
+
+    const cls = CLASSES[player.className];
+    const race = RACES[player.race];
+    const bg = BACKGROUNDS[player.background];
+
+    document.getElementById("race-class-preview").innerHTML =
+      `<strong>${player.race}:</strong> ${race.traits}<br><strong>${player.className}:</strong> Hit Die d${cls.hitDie}, Saves: ${cls.saves.join(" & ")}`;
+
+    document.getElementById("bg-preview").innerHTML =
+      `<strong>${player.background} Bonus Skills:</strong> ${bg.skills.join(", ")} | <strong>Feature:</strong> ${bg.feature}`;
+
+    renderStatsGrid();
+
+    document.getElementById("derived-combat-preview").innerHTML =
+      `<strong>Level 1 Derived Stats:</strong> Max HP <strong>${player.maxHp}</strong> (d${cls.hitDie} + CON) · Armor Class <strong>${player.ac}</strong> · Proficiency Bonus <strong>+2</strong>`;
+
+    renderSkillGrid();
+
+    document.getElementById("gear-preview").innerHTML =
+      `<strong>Starting PHB Equipment:</strong> ${player.inventory.join(", ")}`;
+
+    updateHud();
+  }
+
+  [charNameInput, raceSelect, classSelect, bgSelect, alignSelect, dmgToneSelect].forEach(el => {
+    el.addEventListener("change", refreshBuilderUI);
+    el.addEventListener("input", refreshBuilderUI);
+  });
+
+  function updateHud() {
+    document.getElementById("class-pill").textContent = `${player.name} · Lv.1 ${player.className}`;
+    document.getElementById("hp-pill").textContent = `HP ${player.hp}/${player.maxHp}`;
+    document.getElementById("ac-pill").textContent = `AC ${player.ac}`;
+
+    document.getElementById("sheet-identity").innerHTML =
+      `<strong>Identity:</strong> ${player.name}, ${player.alignment} ${player.race} ${player.className} (${player.background}) · <strong>DMG Tone:</strong> ${player.dmgTone}`;
+
+    const statLine = STATS.map(s => {
+      const m = player.getMod(s);
+      return `${s} ${player.getFinalStat(s)} (${m >= 0 ? "+" + m : m})`;
+    }).join(" · ");
+    document.getElementById("sheet-stats").innerHTML = `<strong>Abilities:</strong> ${statLine}`;
+    document.getElementById("sheet-skills").innerHTML = `<strong>Proficient Skills (+2):</strong> ${player.getAllProficientSkills().join(", ")}`;
+    document.getElementById("sheet-gear").innerHTML = `<strong>Equipment:</strong> ${player.inventory.join(", ")}`;
+  }
+
+  // 4. AI DUNGEON MASTER & PHB/DMG RULES ARBITER
+  const INTENT_PROMPT = `You are a Dungeons & Dragons 5th Edition (PHB & DMG) Rules Arbiter.
+Evaluate the player's action against the current scene and their 5e character sheet.
+Reply ONLY with a raw JSON object matching this exact schema:
+{"requires_roll":true,"stat":"DEX","skill_name":"Stealth","dc":12,"item_consumed":"","impossible_reason":""}
+Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false and dc to 0 if no check is needed.`;
+
+  function getNarratorPrompt() {
+    return `You are an expert Dungeons & Dragons 5e Dungeon Master running a "${player.dmgTone}" campaign following the Dungeon Master's Guide.
+The player character is ${player.name}, a Level 1 ${player.alignment} ${player.race} ${player.className} with the ${player.background} background.
+Keep responses vivid, interactive, and concise (maximum 2 short paragraphs).
+Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
+End by asking the player what they do next.`;
+  }
 
   let mlcEngine = null;
   let activeMode = "webgpu";
   let storyHistory = [];
-
-  function updateHud() {
-    classPill.textContent = `Lv.1 ${player.className}`;
-    hpPill.textContent = `HP ${player.hp}/${player.maxHp}`;
-    acPill.textContent = `AC ${player.ac}`;
-
-    const statStr = Object.entries(player.stats)
-      .map(([k, v]) => {
-        const m = player.getMod(k);
-        return `${k} ${v} (${m >= 0 ? "+" + m : m})`;
-      })
-      .join(" · ");
-    statsDetail.innerHTML = `<strong>Ability Scores:</strong> ${statStr}`;
-    gearDetail.innerHTML = `<strong>Equipment:</strong> ${player.inventory.join(", ")}`;
-  }
-
-  gearBtn.addEventListener("click", () => {
-    gearPanel.classList.toggle("hidden");
-    setupPanel.classList.add("hidden");
-  });
-
-  setupBtn.addEventListener("click", () => {
-    setupPanel.classList.toggle("hidden");
-    gearPanel.classList.add("hidden");
-  });
-
-  classSelect.addEventListener("change", () => {
-    const picked = CLASSES[classSelect.value];
-    Object.assign(player, structuredClone(picked));
-    updateHud();
-  });
 
   function addMessage(html, type = "dm") {
     const div = document.createElement("div");
     div.className = `msg ${type}`;
     div.innerHTML = html;
     logEl.appendChild(div);
-    logEl.scrollTop = logEl.scrollHeight;
+    mainArea.scrollTop = mainArea.scrollHeight;
   }
 
   initBtn.addEventListener("click", async () => {
+    refreshBuilderUI();
     activeMode = engineSelect.value;
     initBtn.disabled = true;
-    classSelect.disabled = true;
 
     if (activeMode === "webgpu") {
       try {
         statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B...";
-        mlcEngine = await webllm.CreateMLCEngine(
-          "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
-          { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
-        );
+        if (!mlcEngine) {
+          mlcEngine = await webllm.CreateMLCEngine(
+            "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+            { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
+          );
+        }
         statusEl.textContent = "On-Device WebGPU Ready (100% Offline)";
         startGame();
       } catch (err) {
         statusEl.textContent = "WebGPU Error: " + err.message;
         initBtn.disabled = false;
-        classSelect.disabled = false;
       }
     } else {
       statusEl.textContent = "Connected to Localhost Server (127.0.0.1:8080)";
@@ -485,11 +1072,14 @@ End by asking the player what they do next.`;
   });
 
   function startGame() {
-    setupPanel.classList.add("hidden");
+    builderEl.classList.add("hidden");
+    logEl.classList.remove("hidden");
     inputEl.disabled = false;
+    inputEl.placeholder = `What does ${player.name} do?`;
     sendBtn.disabled = false;
+
     if (storyHistory.length === 0) {
-      const intro = "You are escorting a supply wagon along the dirt road toward the frontier town of Phandalin. Rounding a bend flanked by dense woodland thickets, you spot two dead horses sprawled across the trail fifty feet ahead, feathered with black goblin arrows. The woods on either side are eerily quiet. What do you do?";
+      const intro = `As ${player.name}, a Level 1 ${player.race} ${player.className} (${player.background}), you escort a supply wagon along the dirt road toward the frontier town of Phandalin. Rounding a wooded bend, you spot two dead horses sprawled across the trail fifty feet ahead, feathered with black goblin arrows. The thickets on either side are silent. What do you do?`;
       addMessage(`<strong>DM:</strong> ${intro}`, "dm");
       storyHistory.push({ role: "assistant", content: intro });
     }
@@ -526,10 +1116,10 @@ End by asking the player what they do next.`;
     inputEl.disabled = true;
     sendBtn.disabled = true;
     inputEl.blur();
-    addMessage(`<strong>You:</strong> ${action}`, "player");
+    addMessage(`<strong>${player.name}:</strong> ${action}`, "player");
 
     try {
-      statusEl.textContent = "Checking 5e rules...";
+      statusEl.textContent = "Checking PHB & DMG rules...";
       const lastScene = storyHistory[storyHistory.length - 1]?.content || "";
       const rawIntent = await callLLM([
         { role: "system", content: INTENT_PROMPT },
@@ -559,29 +1149,30 @@ End by asking the player what they do next.`;
         }
 
         if (intent.requires_roll) {
-          const stat = ["STR","DEX","CON","INT","WIS","CHA"].includes(intent.stat) ? intent.stat : "DEX";
+          const stat = STATS.includes(intent.stat) ? intent.stat : "DEX";
           const dc = Number(intent.dc) || 12;
           const skill = intent.skill_name || stat;
-          const r = player.rollD20(stat);
+          const r = player.rollD20(stat, skill);
           const success = (r.total >= dc || r.isCrit) && !r.isFumble;
           let tag = success ? "SUCCESS" : "FAILURE";
           if (r.isCrit) tag = "CRITICAL SUCCESS (Nat 20!)";
           if (r.isFumble) tag = "CRITICAL FAILURE (Nat 1!)";
 
+          const profText = r.isProf ? ` + ${r.prof} (Prof)` : "";
           addMessage(
-            `<strong>[${skill} (${stat})]</strong> 1d20 (${r.nat}) + ${r.mod} = <strong>${r.total}</strong> vs DC ${dc} &rarr; <strong>${tag}</strong>`,
+            `<strong>[${skill} (${stat})]</strong> 1d20 (${r.nat}) + ${r.mod}${profText} = <strong>${r.total}</strong> vs DC ${dc} &rarr; <strong>${tag}</strong>`,
             "roll"
           );
-          sysNote = `SYSTEM: Player (${player.className}) attempted "${action}". Rolled ${skill} (${stat}): ${r.total} vs DC ${dc}. Outcome: ${tag}. Narrate the result.`;
+          sysNote = `SYSTEM: ${player.name} (${player.race} ${player.className}) attempted "${action}". Rolled ${skill} (${stat}): ${r.total} vs DC ${dc}. Outcome: ${tag}. Narrate the result.`;
         } else {
-          sysNote = `SYSTEM: Player (${player.className}) performs "${action}". Automatic success. Narrate the outcome.`;
+          sysNote = `SYSTEM: ${player.name} (${player.race} ${player.className}) performs "${action}". Automatic success. Narrate the outcome.`;
         }
       }
 
       statusEl.textContent = "DM is narrating...";
       storyHistory.push({ role: "user", content: `${action}\n[${sysNote}]` });
       const recentMessages = [
-        { role: "system", content: NARRATOR_PROMPT },
+        { role: "system", content: getNarratorPrompt() },
         ...storyHistory.slice(-8)
       ];
 
@@ -603,7 +1194,7 @@ End by asking the player what they do next.`;
     if (e.key === "Enter") handleTurn();
   });
 
-  updateHud();
+  refreshBuilderUI();
 </script>
 </body>
 </html>
