@@ -104,7 +104,9 @@
 
     .hud-buttons {
       display: flex;
-      gap: 6px;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .btn-small {
@@ -112,8 +114,8 @@
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 5px 9px;
-      font-size: clamp(11px, 2.7vw, 13px);
+      padding: 5px 8px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
@@ -420,6 +422,9 @@
         <div class="hud-buttons">
           <button class="btn-small" id="sheet-btn" type="button">Sheet</button>
           <button class="btn-small" id="builder-toggle-btn" type="button">Creator</button>
+          <button class="btn-small" id="export-btn" type="button" title="Export Save">Export</button>
+          <button class="btn-small" id="import-btn" type="button" title="Import Save">Import</button>
+          <input type="file" id="import-file" accept=".json" style="display: none;" />
         </div>
       </div>
 
@@ -431,7 +436,7 @@
         <div class="info-text" id="sheet-gear"></div>
       </div>
 
-      <div id="status-banner">[v3.0 PHB/DMG Builder] Complete steps 1–4 to begin your adventure.</div>
+      <div id="status-banner">[v3.3 PHB/DMG Builder] Complete steps 1–4 to begin your adventure.</div>
     </header>
 
     <main id="main-area">
@@ -612,7 +617,7 @@
       hitDie: 12, saves: ["STR", "CON"], skillCount: 2,
       skillPool: ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"],
       gear: ["Greataxe", "2 Handaxes", "Explorer's Pack", "Potion of Healing"],
-      calcAc: (m) => 10 + m.DEX + m.CON // Unarmored Defense
+      calcAc: (m) => 10 + m.DEX + m.CON
     },
     "Bard": {
       hitDie: 8, saves: ["DEX", "CHA"], skillCount: 3,
@@ -636,13 +641,13 @@
       hitDie: 10, saves: ["STR", "CON"], skillCount: 2,
       skillPool: ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"],
       gear: ["Longsword", "Shield", "Chain Mail", "Light Crossbow", "Potion of Healing"],
-      calcAc: () => 18 // Chain Mail (16) + Shield (+2)
+      calcAc: () => 18
     },
     "Monk": {
       hitDie: 8, saves: ["STR", "DEX"], skillCount: 2,
       skillPool: ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"],
       gear: ["Shortsword", "10 Darts", "Explorer's Pack", "Potion of Healing"],
-      calcAc: (m) => 10 + m.DEX + m.WIS // Unarmored Defense
+      calcAc: (m) => 10 + m.DEX + m.WIS
     },
     "Paladin": {
       hitDie: 10, saves: ["WIS", "CHA"], skillCount: 2,
@@ -666,7 +671,7 @@
       hitDie: 6, saves: ["CON", "CHA"], skillCount: 2,
       skillPool: ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"],
       gear: ["Light Crossbow", "Arcane Focus", "2 Daggers", "Spells (Fire Bolt, Magic Missile, Burning Hands)", "Potion of Healing"],
-      calcAc: (m) => 13 + m.DEX // Draconic Resilience / Mage Armor baseline
+      calcAc: (m) => 13 + m.DEX
     },
     "Warlock": {
       hitDie: 8, saves: ["WIS", "CHA"], skillCount: 2,
@@ -814,6 +819,72 @@
     logEl.classList.toggle("hidden", !isHidden);
   });
 
+  // EXPORT & IMPORT SAVE LOGIC
+  const exportBtn = document.getElementById("export-btn");
+  const importBtn = document.getElementById("import-btn");
+  const importFile = document.getElementById("import-file");
+
+  exportBtn.onclick = () => {
+    const saveData = {
+      player: {
+        name: player.name, race: player.race, className: player.className,
+        background: player.background, alignment: player.alignment, dmgTone: player.dmgTone,
+        level: player.level, baseStats: player.baseStats, chosenSkills: Array.from(player.chosenSkills),
+        hp: player.hp, maxHp: player.maxHp, ac: player.ac, inventory: player.inventory
+      },
+      storyHistory
+    };
+    const blob = new Blob([JSON.stringify(saveData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${player.name.replace(/[^a-z0-9]/gi, '_')}_dnd_save.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  importBtn.onclick = () => importFile.click();
+
+  importFile.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        Object.assign(player, data.player);
+        player.chosenSkills = new Set(data.player.chosenSkills || []);
+        storyHistory = data.storyHistory || [];
+
+        // Update UI inputs
+        charNameInput.value = player.name;
+        raceSelect.value = player.race;
+        classSelect.value = player.className;
+        bgSelect.value = player.background;
+
+        refreshBuilderUI();
+
+        // Rebuild story log on screen
+        logEl.innerHTML = "";
+        storyHistory.forEach(msg => {
+          const type = msg.role === "assistant" ? "dm" : "player";
+          const speaker = msg.role === "assistant" ? "DM" : player.name;
+          addMessage(`<strong>${speaker}:</strong> ${msg.content}`, type);
+        });
+
+        // Launch game view
+        builderEl.classList.add("hidden");
+        logEl.classList.remove("hidden");
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        statusEl.textContent = "Save game imported successfully!";
+      } catch (err) {
+        alert("Invalid save file format.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // Ability Score Generation Logic
   function applyStandardArray() {
     STATS.forEach((s, i) => { player.baseStats[s] = STANDARD_ARRAY[i]; });
@@ -892,7 +963,6 @@
       statsGrid.appendChild(box);
     });
 
-    // Attach Point-Buy or Swap listeners
     statsGrid.querySelectorAll("button[data-stat]").forEach(btn => {
       btn.addEventListener("click", () => {
         const s = btn.getAttribute("data-stat");
@@ -923,13 +993,11 @@
     const cls = CLASSES[player.className];
     const bgSkills = BACKGROUNDS[player.background].skills;
 
-    // Prune invalid chosen skills when class changes
     Array.from(player.chosenSkills).forEach(sk => {
       if (!cls.skillPool.includes(sk) || bgSkills.includes(sk)) {
         player.chosenSkills.delete(sk);
       }
     });
-    // Auto-fill up to class skillCount if under-selected
     for (const sk of cls.skillPool) {
       if (player.chosenSkills.size >= cls.skillCount) break;
       if (!bgSkills.includes(sk)) player.chosenSkills.add(sk);
@@ -1115,7 +1183,6 @@ Core Rules:
     addMessage(`<strong>${player.name}:</strong> ${action}`, "player");
 
     try {
-      // Check if input is purely a conversational question or looking around
       const lowerAction = action.toLowerCase();
       const isQuestion = lowerAction.includes("?") || 
                          lowerAction.startsWith("who") || 
@@ -1129,11 +1196,9 @@ Core Rules:
       let sysNote = "";
 
       if (isQuestion) {
-        // Skip dice roll for natural conversation / context questions
         statusEl.textContent = "DM is answering...";
         sysNote = `SYSTEM: Player asked a context or conversational question ("${action}"). Answer it naturally and factually without rolling dice.`;
       } else {
-        // Run Rules Arbiter only for active physical actions
         statusEl.textContent = "Checking PHB & DMG rules...";
         const lastScene = storyHistory[storyHistory.length - 1]?.content || "";
         const INTENT_PROMPT = `You are a D&D 5e Rules Arbiter. Evaluate if this action requires a mechanical d20 skill check or attack roll.
