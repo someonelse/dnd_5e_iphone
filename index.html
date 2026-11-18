@@ -1018,19 +1018,15 @@
     document.getElementById("sheet-gear").innerHTML = `<strong>Equipment:</strong> ${player.inventory.join(", ")}`;
   }
 
-  // 4. AI DUNGEON MASTER & PHB/DMG RULES ARBITER
-  const INTENT_PROMPT = `You are a Dungeons & Dragons 5th Edition (PHB & DMG) Rules Arbiter.
-Evaluate the player's action against the current scene and their 5e character sheet.
-Reply ONLY with a raw JSON object matching this exact schema:
-{"requires_roll":true,"stat":"DEX","skill_name":"Stealth","dc":12,"item_consumed":"","impossible_reason":""}
-Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false and dc to 0 if no check is needed.`;
-
+  // 4. AI DUNGEON MASTER & NATURAL CONVERSATION ENGINE
   function getNarratorPrompt() {
     return `You are an expert Dungeons & Dragons 5e Dungeon Master running a "${player.dmgTone}" campaign following the Dungeon Master's Guide.
 The player character is ${player.name}, a Level 1 ${player.alignment} ${player.race} ${player.className} with the ${player.background} background.
-Keep responses vivid, interactive, and concise (maximum 2 short paragraphs).
-Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
-End by asking the player what they do next.`;
+Core Rules:
+1. You are talking directly to the player. If they ask a context question (e.g., "Who am I with?", "What do I see?"), answer it factually and naturally.
+2. NEVER write actions, dialogue, or decisions for the player character. Let the player act.
+3. Keep responses under 2 short paragraphs, immersive and atmospheric.
+4. End by asking what they do next.`;
   }
 
   let mlcEngine = null;
@@ -1119,53 +1115,77 @@ End by asking the player what they do next.`;
     addMessage(`<strong>${player.name}:</strong> ${action}`, "player");
 
     try {
-      statusEl.textContent = "Checking PHB & DMG rules...";
-      const lastScene = storyHistory[storyHistory.length - 1]?.content || "";
-      const rawIntent = await callLLM([
-        { role: "system", content: INTENT_PROMPT },
-        { role: "user", content: `Scene: ${lastScene}\nCharacter: ${player.summary()}\nAction: ${action}` }
-      ], true);
-
-      let intent = { requires_roll: false };
-      try {
-        const jsonMatch = rawIntent.match(/\{[\s\S]*\}/);
-        if (jsonMatch) intent = JSON.parse(jsonMatch[0]);
-      } catch (_) {}
+      // Check if input is purely a conversational question or looking around
+      const lowerAction = action.toLowerCase();
+      const isQuestion = lowerAction.includes("?") || 
+                         lowerAction.startsWith("who") || 
+                         lowerAction.startsWith("what") || 
+                         lowerAction.startsWith("where") || 
+                         lowerAction.startsWith("why") || 
+                         lowerAction.startsWith("is") || 
+                         lowerAction.startsWith("can i see") ||
+                         lowerAction.startsWith("look");
 
       let sysNote = "";
-      if (intent.impossible_reason) {
-        sysNote = `SYSTEM: Action invalid (${intent.impossible_reason}). Narrate why it fails without rolling.`;
+
+      if (isQuestion) {
+        // Skip dice roll for natural conversation / context questions
+        statusEl.textContent = "DM is answering...";
+        sysNote = `SYSTEM: Player asked a context or conversational question ("${action}"). Answer it naturally and factually without rolling dice.`;
       } else {
-        if (intent.item_consumed && player.inventory.includes(intent.item_consumed)) {
-          player.inventory = player.inventory.filter(i => i !== intent.item_consumed);
-          if (intent.item_consumed.includes("Potion of Healing")) {
-            const heal = Math.floor(Math.random() * 4) + 1 + Math.floor(Math.random() * 4) + 1 + 2;
-            player.hp = Math.min(player.maxHp, player.hp + heal);
-            addMessage(`Drank Potion of Healing (+${heal} HP)`, "system");
-          } else {
-            addMessage(`Used ${intent.item_consumed}`, "system");
-          }
-          updateHud();
-        }
+        // Run Rules Arbiter only for active physical actions
+        statusEl.textContent = "Checking PHB & DMG rules...";
+        const lastScene = storyHistory[storyHistory.length - 1]?.content || "";
+        const INTENT_PROMPT = `You are a D&D 5e Rules Arbiter. Evaluate if this action requires a mechanical d20 skill check or attack roll.
+Reply ONLY with a raw JSON object:
+{"requires_roll":true,"stat":"DEX","skill_name":"Stealth","dc":12,"item_consumed":"","impossible_reason":""}
+Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false if no check is needed.`;
 
-        if (intent.requires_roll) {
-          const stat = STATS.includes(intent.stat) ? intent.stat : "DEX";
-          const dc = Number(intent.dc) || 12;
-          const skill = intent.skill_name || stat;
-          const r = player.rollD20(stat, skill);
-          const success = (r.total >= dc || r.isCrit) && !r.isFumble;
-          let tag = success ? "SUCCESS" : "FAILURE";
-          if (r.isCrit) tag = "CRITICAL SUCCESS (Nat 20!)";
-          if (r.isFumble) tag = "CRITICAL FAILURE (Nat 1!)";
+        const rawIntent = await callLLM([
+          { role: "system", content: INTENT_PROMPT },
+          { role: "user", content: `Scene: ${lastScene}\nCharacter: ${player.summary()}\nAction: ${action}` }
+        ], true);
 
-          const profText = r.isProf ? ` + ${r.prof} (Prof)` : "";
-          addMessage(
-            `<strong>[${skill} (${stat})]</strong> 1d20 (${r.nat}) + ${r.mod}${profText} = <strong>${r.total}</strong> vs DC ${dc} &rarr; <strong>${tag}</strong>`,
-            "roll"
-          );
-          sysNote = `SYSTEM: ${player.name} (${player.race} ${player.className}) attempted "${action}". Rolled ${skill} (${stat}): ${r.total} vs DC ${dc}. Outcome: ${tag}. Narrate the result.`;
+        let intent = { requires_roll: false };
+        try {
+          const jsonMatch = rawIntent.match(/\{[\s\S]*\}/);
+          if (jsonMatch) intent = JSON.parse(jsonMatch[0]);
+        } catch (_) {}
+
+        if (intent.impossible_reason) {
+          sysNote = `SYSTEM: Action invalid (${intent.impossible_reason}). Narrate why it fails without rolling.`;
         } else {
-          sysNote = `SYSTEM: ${player.name} (${player.race} ${player.className}) performs "${action}". Automatic success. Narrate the outcome.`;
+          if (intent.item_consumed && player.inventory.includes(intent.item_consumed)) {
+            player.inventory = player.inventory.filter(i => i !== intent.item_consumed);
+            if (intent.item_consumed.includes("Potion of Healing")) {
+              const heal = Math.floor(Math.random() * 4) + 1 + Math.floor(Math.random() * 4) + 1 + 2;
+              player.hp = Math.min(player.maxHp, player.hp + heal);
+              addMessage(`Drank Potion of Healing (+${heal} HP)`, "system");
+            } else {
+              addMessage(`Used ${intent.item_consumed}`, "system");
+            }
+            updateHud();
+          }
+
+          if (intent.requires_roll) {
+            const stat = STATS.includes(intent.stat) ? intent.stat : "DEX";
+            const dc = Number(intent.dc) || 12;
+            const skill = intent.skill_name || stat;
+            const r = player.rollD20(stat, skill);
+            const success = (r.total >= dc || r.isCrit) && !r.isFumble;
+            let tag = success ? "SUCCESS" : "FAILURE";
+            if (r.isCrit) tag = "CRITICAL SUCCESS (Nat 20!)";
+            if (r.isFumble) tag = "CRITICAL FAILURE (Nat 1!)";
+
+            const profText = r.isProf ? ` + ${r.prof} (Prof)` : "";
+            addMessage(
+              `<strong>[${skill} (${stat})]</strong> 1d20 (${r.nat}) + ${r.mod}${profText} = <strong>${r.total}</strong> vs DC ${dc} &rarr; <strong>${tag}</strong>`,
+              "roll"
+            );
+            sysNote = `SYSTEM: ${player.name} attempted "${action}". Rolled ${skill} (${stat}): ${r.total} vs DC ${dc}. Outcome: ${tag}. Narrate the result.`;
+          } else {
+            sysNote = `SYSTEM: ${player.name} performs "${action}". Automatic success. Narrate the outcome.`;
+          }
         }
       }
 
