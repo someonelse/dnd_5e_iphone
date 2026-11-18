@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>D&D 5e Solo RPG</title>
+  <style>
+    :root {
+      --bg: #121318;
+      --panel: #1e2029;
+      --accent: #e5a93c;
+      --text: #eceae5;
+      --muted: #9496a1;
+      --cyan: #5bc0be;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      overflow: hidden;
+    }
+    header {
+      background: var(--panel);
+      padding: 10px 14px;
+      border-bottom: 1px solid #2e3240;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bar-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    select, button {
+      background: #282b38;
+      color: var(--text);
+      border: 1px solid #3f4459;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+    select { flex: 1; }
+    button.primary {
+      background: var(--accent);
+      color: #111;
+      font-weight: 700;
+      border: none;
+    }
+    button:disabled { opacity: 0.45; }
+    .stats-bar {
+      font-size: 12px;
+      color: var(--accent);
+      padding-top: 4px;
+      border-top: 1px solid #2a2d3a;
+    }
+    #status-banner {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #story-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+    .msg { line-height: 1.5; font-size: 15px; word-wrap: break-word; }
+    .msg.dm { color: var(--text); }
+    .msg.dm strong { color: var(--accent); }
+    .msg.player { color: var(--cyan); }
+    .msg.roll {
+      background: #232016;
+      border-left: 3px solid var(--accent);
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 4px;
+      color: #f7e6b5;
+    }
+    .msg.system { color: var(--muted); font-size: 12px; font-style: italic; }
+    footer {
+      background: var(--panel);
+      padding: 10px 12px;
+      border-top: 1px solid #2e3240;
+      display: flex;
+      gap: 8px;
+    }
+    #player-input {
+      flex: 1;
+      background: #14151c;
+      color: var(--text);
+      border: 1px solid #3a3f54;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="bar-row">
+    <select id="class-select">
+      <option value="Fighter">Level 1 Fighter (Longsword & Shield)</option>
+      <option value="Rogue">Level 1 Rogue (Shortbow & Thieves' Tools)</option>
+      <option value="Wizard">Level 1 Wizard (Spellbook & Quarterstaff)</option>
+      <option value="Cleric">Level 1 Cleric (Mace & Holy Symbol)</option>
+    </select>
+  </div>
+  <div class="bar-row">
+    <select id="engine-select">
+      <option value="webgpu">On-Device WebGPU (Qwen 2.5 1.5B - In Browser)</option>
+      <option value="localhost">On-Device Localhost App (127.0.0.1:8080)</option>
+    </select>
+    <button id="init-btn" class="primary">Start 5e</button>
+  </div>
+  <div id="status-banner">Choose your class and tap "Start 5e" to load the on-device AI.</div>
+  <div class="stats-bar" id="hud"></div>
+</header>
+
+<main id="story-log"></main>
+
+<footer>
+  <input type="text" id="player-input" placeholder="What do you do?" autocomplete="off" disabled />
+  <button id="send-btn" class="primary" disabled>Act</button>
+</footer>
+
+<script type="module">
+  import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+  // 1. VANILLA D&D 5e SRD CLASS PRESETS
+  const CLASSES = {
+    Fighter: {
+      className: "Fighter", hp: 12, maxHp: 12, ac: 16,
+      stats: { STR: 16, DEX: 12, CON: 14, INT: 10, WIS: 12, CHA: 10 },
+      inventory: ["Longsword", "Chain Mail", "Shield", "Potion of Healing", "50ft Hempen Rope"]
+    },
+    Rogue: {
+      className: "Rogue", hp: 10, maxHp: 10, ac: 14,
+      stats: { STR: 10, DEX: 16, CON: 14, INT: 12, WIS: 10, CHA: 14 },
+      inventory: ["Shortsword", "Shortbow", "Thieves' Tools", "Potion of Healing", "Leather Armor"]
+    },
+    Wizard: {
+      className: "Wizard", hp: 8, maxHp: 8, ac: 12,
+      stats: { STR: 8, DEX: 14, CON: 14, INT: 16, WIS: 12, CHA: 10 },
+      inventory: ["Quarterstaff", "Spellbook (Fire Bolt, Magic Missile, Shield)", "Potion of Healing"]
+    },
+    Cleric: {
+      className: "Cleric", hp: 10, maxHp: 10, ac: 16,
+      stats: { STR: 14, DEX: 10, CON: 14, INT: 10, WIS: 16, CHA: 12 },
+      inventory: ["Mace", "Scale Mail", "Holy Symbol (Cure Wounds, Guiding Bolt)", "Potion of Healing"]
+    }
+  };
+
+  let player = {
+    ...structuredClone(CLASSES.Fighter),
+    getMod(stat) {
+      const score = this.stats[stat] ?? 10;
+      return Math.floor((score - 10) / 2);
+    },
+    rollD20(stat) {
+      const nat = Math.floor(Math.random() * 20) + 1;
+      const mod = this.getMod(stat);
+      return { nat, mod, total: nat + mod, isCrit: nat === 20, isFumble: nat === 1 };
+    },
+    summary() {
+      return `Lv.1 ${this.className} | HP: ${this.hp}/${this.maxHp} | AC: ${this.ac} | Gear: ${this.inventory.join(", ")}`;
+    }
+  };
+
+  // 2. VANILLA D&D 5e PROMPTS
+  const INTENT_PROMPT = `You are a Dungeons & Dragons 5th Edition (5e SRD) Rules Arbiter.
+Evaluate the player's action against the current scene and their 5e class/inventory.
+Reply ONLY with a raw JSON object matching this exact schema:
+{"requires_roll":true,"stat":"DEX","skill_name":"Stealth","dc":12,"item_consumed":"","impossible_reason":""}
+Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false and dc to 0 if no check is needed.`;
+
+  const NARRATOR_PROMPT = `You are a classic high-fantasy Dungeons & Dragons 5e Dungeon Master.
+Run a traditional 5e adventure (taverns, roadside goblin ambushes, dungeons, dragons, and loot).
+Keep responses clear, engaging, and concise (maximum 2 short paragraphs).
+Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
+End by asking the player what they do next.`;
+
+  const logEl = document.getElementById("story-log");
+  const hudEl = document.getElementById("hud");
+  const statusEl = document.getElementById("status-banner");
+  const inputEl = document.getElementById("player-input");
+  const sendBtn = document.getElementById("send-btn");
+  const initBtn = document.getElementById("init-btn");
+  const engineSelect = document.getElementById("engine-select");
+  const classSelect = document.getElementById("class-select");
+
+  let mlcEngine = null;
+  let activeMode = "webgpu";
+  let storyHistory = [];
+
+  function updateHud() {
+    hudEl.textContent = player.summary();
+  }
+
+  classSelect.addEventListener("change", () => {
+    const picked = CLASSES[classSelect.value];
+    Object.assign(player, structuredClone(picked));
+    updateHud();
+  });
+
+  function addMessage(html, type = "dm") {
+    const div = document.createElement("div");
+    div.className = `msg ${type}`;
+    div.innerHTML = html;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  initBtn.addEventListener("click", async () => {
+    activeMode = engineSelect.value;
+    initBtn.disabled = true;
+    classSelect.disabled = true;
+
+    if (activeMode === "webgpu") {
+      try {
+        statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B (cached after first load)...";
+        mlcEngine = await webllm.CreateMLCEngine(
+          "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+          { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
+        );
+        statusEl.textContent = "On-Device WebGPU Ready (100% Offline)";
+        startGame();
+      } catch (err) {
+        statusEl.textContent = "WebGPU Error: " + err.message;
+        initBtn.disabled = false;
+        classSelect.disabled = false;
+      }
+    } else {
+      statusEl.textContent = "Connected to Localhost iOS Server (127.0.0.1:8080)";
+      startGame();
+    }
+  });
+
+  function startGame() {
+    inputEl.disabled = false;
+    sendBtn.disabled = false;
+    if (storyHistory.length === 0) {
+      const intro = "You are escorting a supply wagon along the dirt road toward the frontier town of Phandalin. Rounding a bend flanked by dense woodland thickets, you spot two dead horses sprawled across the trail fifty feet ahead, feathered with black goblin arrows. The woods on either side are eerily quiet. What do you do?";
+      addMessage(`<strong>DM:</strong> ${intro}`, "dm");
+      storyHistory.push({ role: "assistant", content: intro });
+    }
+  }
+
+  async function callLLM(messages, jsonMode = false) {
+    if (activeMode === "webgpu") {
+      const reply = await mlcEngine.chat.completions.create({
+        messages,
+        temperature: jsonMode ? 0.1 : 0.7,
+        max_tokens: jsonMode ? 120 : 280
+      });
+      return reply.choices[0].message.content;
+    } else {
+      const res = await fetch("http://127.0.0.1:8080/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages,
+          temperature: jsonMode ? 0.1 : 0.7,
+          max_tokens: jsonMode ? 120 : 280
+        })
+      });
+      const data = await res.json();
+      return data.choices[0].message.content;
+    }
+  }
+
+  async function handleTurn() {
+    const action = inputEl.value.trim();
+    if (!action) return;
+
+    inputEl.value = "";
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
+    addMessage(`<strong>You:</strong> ${action}`, "player");
+
+    try {
+      statusEl.textContent = "Checking 5e rules...";
+      const lastScene = storyHistory[storyHistory.length - 1]?.content || "";
+      const rawIntent = await callLLM([
+        { role: "system", content: INTENT_PROMPT },
+        { role: "user", content: `Scene: ${lastScene}\nCharacter: ${player.summary()}\nAction: ${action}` }
+      ], true);
+
+      let intent = { requires_roll: false };
+      try {
+        const jsonMatch = rawIntent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) intent = JSON.parse(jsonMatch[0]);
+      } catch (_) {}
+
+      let sysNote = "";
+      if (intent.impossible_reason) {
+        sysNote = `SYSTEM: Action invalid (${intent.impossible_reason}). Narrate why it fails without rolling.`;
+      } else {
+        if (intent.item_consumed && player.inventory.includes(intent.item_consumed)) {
+          player.inventory = player.inventory.filter(i => i !== intent.item_consumed);
+          if (intent.item_consumed.includes("Potion of Healing")) {
+            const heal = Math.floor(Math.random() * 4) + 1 + Math.floor(Math.random() * 4) + 1 + 2;
+            player.hp = Math.min(player.maxHp, player.hp + heal);
+            addMessage(`Drank Potion of Healing (+${heal} HP)`, "system");
+          } else {
+            addMessage(`Used ${intent.item_consumed}`, "system");
+          }
+          updateHud();
+        }
+
+        if (intent.requires_roll) {
+          const stat = ["STR","DEX","CON","INT","WIS","CHA"].includes(intent.stat) ? intent.stat : "DEX";
+          const dc = Number(intent.dc) || 12;
+          const skill = intent.skill_name || stat;
+          const r = player.rollD20(stat);
+          const success = (r.total >= dc || r.isCrit) && !r.isFumble;
+          let tag = success ? "SUCCESS" : "FAILURE";
+          if (r.isCrit) tag = "CRITICAL SUCCESS (Natural 20!)";
+          if (r.isFumble) tag = "CRITICAL FAILURE (Natural 1!)";
+
+          addMessage(
+            `<strong>[${skill} (${stat})]</strong> 1d20 (${r.nat}) + ${r.mod} = <strong>${r.total}</strong> vs DC ${dc} &rarr; <strong>${tag}</strong>`,
+            "roll"
+          );
+          sysNote = `SYSTEM: Player (${player.className}) attempted "${action}". Rolled ${skill} (${stat}): ${r.total} vs DC ${dc}. Outcome: ${tag}. Narrate the result.`;
+        } else {
+          sysNote = `SYSTEM: Player (${player.className}) performs "${action}". Automatic success. Narrate the outcome.`;
+        }
+      }
+
+      statusEl.textContent = "DM is narrating...";
+      storyHistory.push({ role: "user", content: `${action}\n[${sysNote}]` });
+      const recentMessages = [
+        { role: "system", content: NARRATOR_PROMPT },
+        ...storyHistory.slice(-8)
+      ];
+
+      const dmReply = await callLLM(recentMessages, false);
+      storyHistory.push({ role: "assistant", content: dmReply });
+      addMessage(`<strong>DM:</strong> ${dmReply}`, "dm");
+      statusEl.textContent = "Your turn.";
+    } catch (err) {
+      addMessage(`Error: ${err.message}`, "system");
+      statusEl.textContent = "Error during turn.";
+    } finally {
+      inputEl.disabled = false;
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+  }
+
+  sendBtn.addEventListener("click", handleTurn);
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleTurn();
+  });
+
+  updateHud();
+</script>
+</body>
+</html>
