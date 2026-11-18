@@ -2,25 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>D&D 5e Solo RPG</title>
   <style>
     :root {
-      --bg: #101116;
-      --panel: #1b1d26;
-      --card: #242734;
-      --border: #323648;
+      --bg: #0e1015;
+      --panel: #181a22;
+      --card: #222531;
+      --border: #32374a;
       --accent: #e5a93c;
       --text: #eceae5;
-      --muted: #9496a1;
+      --muted: #9498a6;
       --cyan: #5bc0be;
-      --hp: #ef5350;
-      --ac: #42a5f5;
     }
 
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -33,124 +31,142 @@
       overflow: hidden;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-text-size-adjust: 100%;
     }
 
-    /* Fixed App Shell that dynamically tracks iOS Safari VisualViewport & Keyboard */
-    #app-shell {
+    /* Universal Viewport Wrapper: adapts to Mobile Safari, iPad Split-View, and Desktop */
+    #app-wrapper {
       position: fixed;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    #app-shell {
+      width: 100%;
+      max-width: 900px;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      background: var(--bg);
+      border-left: 1px solid rgba(255, 255, 255, 0.04);
+      border-right: 1px solid rgba(255, 255, 255, 0.04);
       overflow: hidden;
     }
 
     header {
       background: var(--panel);
       padding-top: max(10px, env(safe-area-inset-top));
+      padding-bottom: 10px;
       padding-left: max(12px, env(safe-area-inset-left));
       padding-right: max(12px, env(safe-area-inset-right));
-      padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      z-index: 10;
+      gap: 8px;
+      width: 100%;
+      overflow: hidden;
     }
 
-    /* Top compact HUD bar */
-    .hud-row {
-      display: flex;
+    /* Top HUD Row */
+    .hud-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
       width: 100%;
     }
 
-    .badges {
+    .stat-pills {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 5px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
+      gap: 6px;
       min-width: 0;
-      scrollbar-width: none;
     }
-    .badges::-webkit-scrollbar { display: none; }
 
-    .badge {
+    .pill {
       background: var(--card);
       border: 1px solid var(--border);
       padding: 4px 8px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: clamp(11px, 2.8vw, 13px);
       font-weight: 600;
       white-space: nowrap;
-      flex-shrink: 0;
     }
-    .badge.class-badge { color: var(--accent); }
-    .badge.hp-badge { color: #ff8a80; border-color: rgba(239, 83, 80, 0.35); }
-    .badge.ac-badge { color: #90caf9; border-color: rgba(66, 165, 245, 0.35); }
+    .pill.accent { color: var(--accent); }
+    .pill.hp { color: #ff8a80; }
+    .pill.ac { color: #90caf9; }
 
-    .hud-actions {
+    .hud-buttons {
       display: flex;
       gap: 6px;
-      flex-shrink: 0;
     }
 
-    .icon-btn {
+    .btn-small {
       background: var(--card);
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 5px 9px;
-      font-size: 12px;
+      padding: 6px 10px;
+      font-size: clamp(11px, 2.8vw, 13px);
       font-weight: 600;
+      cursor: pointer;
       white-space: nowrap;
     }
 
-    /* Collapsible Drawer for Setup & Inventory */
-    .drawer {
+    /* Setup & Gear Panels */
+    .panel-box {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
+      width: 100%;
     }
-    .drawer.hidden {
+    .panel-box.hidden {
       display: none;
     }
 
-    .control-row {
-      display: flex;
-      gap: 6px;
+    /* CSS Grid strictly prevents <select> from overflowing on Safari */
+    .grid-row-full {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
       width: 100%;
     }
 
-    select, button {
+    .grid-row-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      width: 100%;
+      align-items: center;
+    }
+
+    select, input, button {
       font-family: inherit;
-      background: #161821;
-      color: var(--text);
-      border: 1px solid var(--border);
+      font-size: clamp(13px, 3.2vw, 15px);
       border-radius: 7px;
-      padding: 8px 10px;
-      font-size: 13px;
-      min-width: 0;
+      border: 1px solid var(--border);
+      background: #12141c;
+      color: var(--text);
     }
 
     select {
-      flex: 1;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      padding: 9px 10px;
+      overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      overflow: hidden;
     }
 
     button.primary {
@@ -158,42 +174,49 @@
       color: #111;
       font-weight: 700;
       border: none;
-      flex-shrink: 0;
-      padding: 8px 14px;
+      padding: 9px 14px;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    button:disabled { opacity: 0.45; }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
 
-    .gear-list {
-      font-size: 12px;
-      color: var(--text);
+    .info-text {
+      font-size: clamp(12px, 2.8vw, 13px);
       line-height: 1.4;
+      color: var(--text);
+      overflow-wrap: anywhere;
     }
-    .gear-list strong { color: var(--accent); }
+    .info-text strong { color: var(--accent); }
 
     #status-banner {
-      font-size: 11px;
+      font-size: clamp(11px, 2.6vw, 12px);
       color: var(--muted);
-      white-space: nowrap;
+      width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
-      width: 100%;
+      white-space: nowrap;
     }
 
-    /* Main Scrollable Story Area */
+    /* Main Scrollable Story Log */
     #story-log {
-      flex: 1;
-      min-height: 0;
+      width: 100%;
+      height: 100%;
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 12px;
+      padding: clamp(12px, 3vw, 20px);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .msg {
-      line-height: 1.45;
-      font-size: 15px;
+      line-height: 1.5;
+      font-size: clamp(14px, 3.5vw, 16px);
+      max-width: 100%;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
@@ -201,128 +224,129 @@
     .msg.dm strong { color: var(--accent); }
     .msg.player {
       color: var(--cyan);
-      background: rgba(91, 192, 190, 0.08);
-      padding: 8px 10px;
+      background: rgba(91, 192, 190, 0.1);
+      border: 1px solid rgba(91, 192, 190, 0.25);
+      padding: 8px 12px;
       border-radius: 8px;
       align-self: flex-end;
-      max-width: 90%;
+      max-width: 88%;
     }
     .msg.roll {
       background: #232016;
       border-left: 3px solid var(--accent);
-      padding: 7px 10px;
-      font-size: 13px;
+      padding: 8px 10px;
+      font-size: clamp(12px, 3vw, 14px);
       border-radius: 4px;
       color: #f7e6b5;
     }
     .msg.system {
       color: var(--muted);
-      font-size: 12px;
+      font-size: clamp(11px, 2.8vw, 13px);
       font-style: italic;
     }
 
-    /* Bottom Action Input Bar */
+    /* Bottom Action Bar */
     footer {
       background: var(--panel);
       padding-top: 8px;
-      padding-left: max(10px, env(safe-area-inset-left));
-      padding-right: max(10px, env(safe-area-inset-right));
       padding-bottom: max(10px, env(safe-area-inset-bottom));
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
       border-top: 1px solid var(--border);
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
-      flex-shrink: 0;
       width: 100%;
+      align-items: center;
     }
 
     #player-input {
-      flex: 1;
+      width: 100%;
       min-width: 0;
-      background: #12131a;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
       padding: 10px 12px;
-      font-size: 16px; /* Prevents iOS auto-zoom when tapping input */
+      font-size: 16px; /* Prevents iOS auto-zoom on focus */
     }
   </style>
 </head>
 <body>
 
-<div id="app-shell">
-  <header>
-    <div class="hud-row">
-      <div class="badges">
-        <span class="badge class-badge" id="class-badge">Lv.1 Fighter</span>
-        <span class="badge hp-badge" id="hp-badge">HP 12/12</span>
-        <span class="badge ac-badge" id="ac-badge">AC 16</span>
+<div id="app-wrapper">
+  <div id="app-shell">
+    <header>
+      <div class="hud-top">
+        <div class="stat-pills">
+          <span class="pill accent" id="class-pill">Lv.1 Fighter</span>
+          <span class="pill hp" id="hp-pill">HP 12/12</span>
+          <span class="pill ac" id="ac-pill">AC 16</span>
+        </div>
+        <div class="hud-buttons">
+          <button class="btn-small" id="gear-btn" type="button">Sheet</button>
+          <button class="btn-small" id="setup-btn" type="button">Setup ▾</button>
+        </div>
       </div>
-      <div class="hud-actions">
-        <button class="icon-btn" id="gear-btn" type="button">Gear</button>
-        <button class="icon-btn" id="setup-btn" type="button">Setup ▾</button>
+
+      <!-- Character Sheet & Inventory Drawer -->
+      <div class="panel-box hidden" id="gear-panel">
+        <div class="info-text" id="stats-detail"></div>
+        <div class="info-text" id="gear-detail"></div>
       </div>
-    </div>
 
-    <!-- Collapsible Gear & Stats Sheet -->
-    <div class="drawer hidden" id="gear-drawer">
-      <div class="gear-list" id="stats-detail"></div>
-      <div class="gear-list" id="gear-detail"></div>
-    </div>
-
-    <!-- Collapsible Setup Drawer (Auto-collapses when game starts) -->
-    <div class="drawer" id="setup-drawer">
-      <div class="control-row">
-        <select id="class-select">
-          <option value="Fighter">Fighter (Longsword & Shield)</option>
-          <option value="Rogue">Rogue (Shortbow & Thieves' Tools)</option>
-          <option value="Wizard">Wizard (Spellbook & Staff)</option>
-          <option value="Cleric">Cleric (Mace & Holy Symbol)</option>
-        </select>
+      <!-- AI & Class Setup Panel -->
+      <div class="panel-box" id="setup-panel">
+        <div class="grid-row-full">
+          <select id="class-select">
+            <option value="Fighter">Class: Lv.1 Fighter (Longsword & Shield)</option>
+            <option value="Rogue">Class: Lv.1 Rogue (Shortbow & Tools)</option>
+            <option value="Wizard">Class: Lv.1 Wizard (Spellbook & Staff)</option>
+            <option value="Cleric">Class: Lv.1 Cleric (Mace & Holy Symbol)</option>
+          </select>
+        </div>
+        <div class="grid-row-split">
+          <select id="engine-select">
+            <option value="webgpu">AI: On-Device WebGPU (Qwen 1.5B)</option>
+            <option value="localhost">AI: Localhost App (127.0.0.1:8080)</option>
+          </select>
+          <button id="init-btn" class="primary" type="button">Start 5e</button>
+        </div>
       </div>
-      <div class="control-row">
-        <select id="engine-select">
-          <option value="webgpu">WebGPU (Qwen 1.5B In-Browser)</option>
-          <option value="localhost">Localhost App (127.0.0.1:8080)</option>
-        </select>
-        <button id="init-btn" class="primary" type="button">Start 5e</button>
-      </div>
-    </div>
 
-    <div id="status-banner">Choose class & tap "Start 5e" to load on-device AI.</div>
-  </header>
+      <div id="status-banner">[v2.0 Universal] Pick class & tap "Start 5e" to load AI.</div>
+    </header>
 
-  <main id="story-log"></main>
+    <main id="story-log"></main>
 
-  <footer>
-    <input type="text" id="player-input" placeholder="What do you do?" autocomplete="off" disabled />
-    <button id="send-btn" class="primary" type="button" disabled>Act</button>
-  </footer>
+    <footer>
+      <input type="text" id="player-input" placeholder="What do you do?" autocomplete="off" disabled />
+      <button id="send-btn" class="primary" type="button" disabled>Act</button>
+    </footer>
+  </div>
 </div>
 
 <script type="module">
   import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
-  // 0. DYNAMIC IOS VISUAL VIEWPORT SIZING (Fixes Safari Toolbar & Keyboard Overlap)
-  const appShell = document.getElementById("app-shell");
+  // 0. UNIVERSAL VIEWPORT TRACKER (Handles iOS Safari Bars, iPad Split-View, & Desktop)
+  const wrapper = document.getElementById("app-wrapper");
   const logEl = document.getElementById("story-log");
 
-  function syncViewport() {
+  function updateViewportSize() {
     if (window.visualViewport) {
-      appShell.style.height = `${window.visualViewport.height}px`;
-      appShell.style.top = `${window.visualViewport.offsetTop}px`;
+      wrapper.style.height = `${window.visualViewport.height}px`;
+      wrapper.style.top = `${window.visualViewport.offsetTop}px`;
     } else {
-      appShell.style.height = `${window.innerHeight}px`;
+      wrapper.style.height = `${window.innerHeight}px`;
+      wrapper.style.top = "0px";
     }
     logEl.scrollTop = logEl.scrollHeight;
   }
   if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", syncViewport);
-    window.visualViewport.addEventListener("scroll", syncViewport);
+    window.visualViewport.addEventListener("resize", updateViewportSize);
+    window.visualViewport.addEventListener("scroll", updateViewportSize);
   }
-  window.addEventListener("resize", syncViewport);
-  syncViewport();
+  window.addEventListener("resize", updateViewportSize);
+  updateViewportSize();
 
-  // 1. VANILLA D&D 5e SRD CLASS PRESETS
+  // 1. VANILLA D&D 5e SRD CLASSES
   const CLASSES = {
     Fighter: {
       className: "Fighter", hp: 12, maxHp: 12, ac: 16,
@@ -375,7 +399,6 @@ Keep responses clear, engaging, and concise (maximum 2 short paragraphs).
 Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
 End by asking the player what they do next.`;
 
-  // 3. UI ELEMENTS & DRAWER TOGGLES
   const statusEl = document.getElementById("status-banner");
   const inputEl = document.getElementById("player-input");
   const sendBtn = document.getElementById("send-btn");
@@ -383,13 +406,13 @@ End by asking the player what they do next.`;
   const engineSelect = document.getElementById("engine-select");
   const classSelect = document.getElementById("class-select");
 
-  const classBadge = document.getElementById("class-badge");
-  const hpBadge = document.getElementById("hp-badge");
-  const acBadge = document.getElementById("ac-badge");
+  const classPill = document.getElementById("class-pill");
+  const hpPill = document.getElementById("hp-pill");
+  const acPill = document.getElementById("ac-pill");
   const statsDetail = document.getElementById("stats-detail");
   const gearDetail = document.getElementById("gear-detail");
-  const gearDrawer = document.getElementById("gear-drawer");
-  const setupDrawer = document.getElementById("setup-drawer");
+  const gearPanel = document.getElementById("gear-panel");
+  const setupPanel = document.getElementById("setup-panel");
   const gearBtn = document.getElementById("gear-btn");
   const setupBtn = document.getElementById("setup-btn");
 
@@ -398,9 +421,9 @@ End by asking the player what they do next.`;
   let storyHistory = [];
 
   function updateHud() {
-    classBadge.textContent = `Lv.1 ${player.className}`;
-    hpBadge.textContent = `HP ${player.hp}/${player.maxHp}`;
-    acBadge.textContent = `AC ${player.ac}`;
+    classPill.textContent = `Lv.1 ${player.className}`;
+    hpPill.textContent = `HP ${player.hp}/${player.maxHp}`;
+    acPill.textContent = `AC ${player.ac}`;
 
     const statStr = Object.entries(player.stats)
       .map(([k, v]) => {
@@ -413,13 +436,13 @@ End by asking the player what they do next.`;
   }
 
   gearBtn.addEventListener("click", () => {
-    gearDrawer.classList.toggle("hidden");
-    setupDrawer.classList.add("hidden");
+    gearPanel.classList.toggle("hidden");
+    setupPanel.classList.add("hidden");
   });
 
   setupBtn.addEventListener("click", () => {
-    setupDrawer.classList.toggle("hidden");
-    gearDrawer.classList.add("hidden");
+    setupPanel.classList.toggle("hidden");
+    gearPanel.classList.add("hidden");
   });
 
   classSelect.addEventListener("change", () => {
@@ -443,7 +466,7 @@ End by asking the player what they do next.`;
 
     if (activeMode === "webgpu") {
       try {
-        statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B (cached after 1st load)...";
+        statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B...";
         mlcEngine = await webllm.CreateMLCEngine(
           "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
           { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
@@ -456,14 +479,13 @@ End by asking the player what they do next.`;
         classSelect.disabled = false;
       }
     } else {
-      statusEl.textContent = "Connected to Localhost iOS Server (127.0.0.1:8080)";
+      statusEl.textContent = "Connected to Localhost Server (127.0.0.1:8080)";
       startGame();
     }
   });
 
   function startGame() {
-    // Automatically collapse the setup menu to maximize story space on iPhone
-    setupDrawer.classList.add("hidden");
+    setupPanel.classList.add("hidden");
     inputEl.disabled = false;
     sendBtn.disabled = false;
     if (storyHistory.length === 0) {
@@ -503,7 +525,7 @@ End by asking the player what they do next.`;
     inputEl.value = "";
     inputEl.disabled = true;
     sendBtn.disabled = true;
-    inputEl.blur(); // Dismiss keyboard so user sees roll & narration clearly
+    inputEl.blur();
     addMessage(`<strong>You:</strong> ${action}`, "player");
 
     try {
