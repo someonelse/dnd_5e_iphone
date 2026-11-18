@@ -8,145 +8,326 @@
   <title>D&D 5e Solo RPG</title>
   <style>
     :root {
-      --bg: #121318;
-      --panel: #1e2029;
+      --bg: #101116;
+      --panel: #1b1d26;
+      --card: #242734;
+      --border: #323648;
       --accent: #e5a93c;
       --text: #eceae5;
       --muted: #9496a1;
       --cyan: #5bc0be;
+      --hp: #ef5350;
+      --ac: #42a5f5;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background: var(--bg);
       color: var(--text);
-      height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* Fixed App Shell that dynamically tracks iOS Safari VisualViewport & Keyboard */
+    #app-shell {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
       overflow: hidden;
     }
+
     header {
       background: var(--panel);
-      padding: 10px 14px;
-      border-bottom: 1px solid #2e3240;
+      padding-top: max(10px, env(safe-area-inset-top));
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
+      z-index: 10;
     }
-    .bar-row {
+
+    /* Top compact HUD bar */
+    .hud-row {
       display: flex;
-      gap: 8px;
       align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
     }
-    select, button {
-      background: #282b38;
+
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      min-width: 0;
+      scrollbar-width: none;
+    }
+    .badges::-webkit-scrollbar { display: none; }
+
+    .badge {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge.class-badge { color: var(--accent); }
+    .badge.hp-badge { color: #ff8a80; border-color: rgba(239, 83, 80, 0.35); }
+    .badge.ac-badge { color: #90caf9; border-color: rgba(66, 165, 245, 0.35); }
+
+    .hud-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      background: var(--card);
       color: var(--text);
-      border: 1px solid #3f4459;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Collapsible Drawer for Setup & Inventory */
+    .drawer {
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .drawer.hidden {
+      display: none;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    select, button {
+      font-family: inherit;
+      background: #161821;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 7px;
       padding: 8px 10px;
       font-size: 13px;
+      min-width: 0;
     }
-    select { flex: 1; }
+
+    select {
+      flex: 1;
+      width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
     button.primary {
       background: var(--accent);
       color: #111;
       font-weight: 700;
       border: none;
+      flex-shrink: 0;
+      padding: 8px 14px;
     }
     button:disabled { opacity: 0.45; }
-    .stats-bar {
+
+    .gear-list {
       font-size: 12px;
-      color: var(--accent);
-      padding-top: 4px;
-      border-top: 1px solid #2a2d3a;
+      color: var(--text);
+      line-height: 1.4;
     }
+    .gear-list strong { color: var(--accent); }
+
     #status-banner {
       font-size: 11px;
       color: var(--muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      width: 100%;
     }
+
+    /* Main Scrollable Story Area */
     #story-log {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      padding: 14px;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      scroll-behavior: smooth;
+      gap: 10px;
     }
-    .msg { line-height: 1.5; font-size: 15px; word-wrap: break-word; }
+
+    .msg {
+      line-height: 1.45;
+      font-size: 15px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     .msg.dm { color: var(--text); }
     .msg.dm strong { color: var(--accent); }
-    .msg.player { color: var(--cyan); }
+    .msg.player {
+      color: var(--cyan);
+      background: rgba(91, 192, 190, 0.08);
+      padding: 8px 10px;
+      border-radius: 8px;
+      align-self: flex-end;
+      max-width: 90%;
+    }
     .msg.roll {
       background: #232016;
       border-left: 3px solid var(--accent);
-      padding: 8px 10px;
+      padding: 7px 10px;
       font-size: 13px;
       border-radius: 4px;
       color: #f7e6b5;
     }
-    .msg.system { color: var(--muted); font-size: 12px; font-style: italic; }
+    .msg.system {
+      color: var(--muted);
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* Bottom Action Input Bar */
     footer {
       background: var(--panel);
-      padding: 10px 12px;
-      border-top: 1px solid #2e3240;
+      padding-top: 8px;
+      padding-left: max(10px, env(safe-area-inset-left));
+      padding-right: max(10px, env(safe-area-inset-right));
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
       display: flex;
       gap: 8px;
+      flex-shrink: 0;
+      width: 100%;
     }
+
     #player-input {
       flex: 1;
-      background: #14151c;
+      min-width: 0;
+      background: #12131a;
       color: var(--text);
-      border: 1px solid #3a3f54;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px 12px;
+      font-size: 16px; /* Prevents iOS auto-zoom when tapping input */
     }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="bar-row">
-    <select id="class-select">
-      <option value="Fighter">Level 1 Fighter (Longsword & Shield)</option>
-      <option value="Rogue">Level 1 Rogue (Shortbow & Thieves' Tools)</option>
-      <option value="Wizard">Level 1 Wizard (Spellbook & Quarterstaff)</option>
-      <option value="Cleric">Level 1 Cleric (Mace & Holy Symbol)</option>
-    </select>
-  </div>
-  <div class="bar-row">
-    <select id="engine-select">
-      <option value="webgpu">On-Device WebGPU (Qwen 2.5 1.5B - In Browser)</option>
-      <option value="localhost">On-Device Localhost App (127.0.0.1:8080)</option>
-    </select>
-    <button id="init-btn" class="primary">Start 5e</button>
-  </div>
-  <div id="status-banner">Choose your class and tap "Start 5e" to load the on-device AI.</div>
-  <div class="stats-bar" id="hud"></div>
-</header>
+<div id="app-shell">
+  <header>
+    <div class="hud-row">
+      <div class="badges">
+        <span class="badge class-badge" id="class-badge">Lv.1 Fighter</span>
+        <span class="badge hp-badge" id="hp-badge">HP 12/12</span>
+        <span class="badge ac-badge" id="ac-badge">AC 16</span>
+      </div>
+      <div class="hud-actions">
+        <button class="icon-btn" id="gear-btn" type="button">Gear</button>
+        <button class="icon-btn" id="setup-btn" type="button">Setup ▾</button>
+      </div>
+    </div>
 
-<main id="story-log"></main>
+    <!-- Collapsible Gear & Stats Sheet -->
+    <div class="drawer hidden" id="gear-drawer">
+      <div class="gear-list" id="stats-detail"></div>
+      <div class="gear-list" id="gear-detail"></div>
+    </div>
 
-<footer>
-  <input type="text" id="player-input" placeholder="What do you do?" autocomplete="off" disabled />
-  <button id="send-btn" class="primary" disabled>Act</button>
-</footer>
+    <!-- Collapsible Setup Drawer (Auto-collapses when game starts) -->
+    <div class="drawer" id="setup-drawer">
+      <div class="control-row">
+        <select id="class-select">
+          <option value="Fighter">Fighter (Longsword & Shield)</option>
+          <option value="Rogue">Rogue (Shortbow & Thieves' Tools)</option>
+          <option value="Wizard">Wizard (Spellbook & Staff)</option>
+          <option value="Cleric">Cleric (Mace & Holy Symbol)</option>
+        </select>
+      </div>
+      <div class="control-row">
+        <select id="engine-select">
+          <option value="webgpu">WebGPU (Qwen 1.5B In-Browser)</option>
+          <option value="localhost">Localhost App (127.0.0.1:8080)</option>
+        </select>
+        <button id="init-btn" class="primary" type="button">Start 5e</button>
+      </div>
+    </div>
+
+    <div id="status-banner">Choose class & tap "Start 5e" to load on-device AI.</div>
+  </header>
+
+  <main id="story-log"></main>
+
+  <footer>
+    <input type="text" id="player-input" placeholder="What do you do?" autocomplete="off" disabled />
+    <button id="send-btn" class="primary" type="button" disabled>Act</button>
+  </footer>
+</div>
 
 <script type="module">
   import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+  // 0. DYNAMIC IOS VISUAL VIEWPORT SIZING (Fixes Safari Toolbar & Keyboard Overlap)
+  const appShell = document.getElementById("app-shell");
+  const logEl = document.getElementById("story-log");
+
+  function syncViewport() {
+    if (window.visualViewport) {
+      appShell.style.height = `${window.visualViewport.height}px`;
+      appShell.style.top = `${window.visualViewport.offsetTop}px`;
+    } else {
+      appShell.style.height = `${window.innerHeight}px`;
+    }
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncViewport);
+    window.visualViewport.addEventListener("scroll", syncViewport);
+  }
+  window.addEventListener("resize", syncViewport);
+  syncViewport();
 
   // 1. VANILLA D&D 5e SRD CLASS PRESETS
   const CLASSES = {
     Fighter: {
       className: "Fighter", hp: 12, maxHp: 12, ac: 16,
       stats: { STR: 16, DEX: 12, CON: 14, INT: 10, WIS: 12, CHA: 10 },
-      inventory: ["Longsword", "Chain Mail", "Shield", "Potion of Healing", "50ft Hempen Rope"]
+      inventory: ["Longsword", "Chain Mail", "Shield", "Potion of Healing", "50ft Rope"]
     },
     Rogue: {
       className: "Rogue", hp: 10, maxHp: 10, ac: 14,
@@ -194,8 +375,7 @@ Keep responses clear, engaging, and concise (maximum 2 short paragraphs).
 Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
 End by asking the player what they do next.`;
 
-  const logEl = document.getElementById("story-log");
-  const hudEl = document.getElementById("hud");
+  // 3. UI ELEMENTS & DRAWER TOGGLES
   const statusEl = document.getElementById("status-banner");
   const inputEl = document.getElementById("player-input");
   const sendBtn = document.getElementById("send-btn");
@@ -203,13 +383,44 @@ End by asking the player what they do next.`;
   const engineSelect = document.getElementById("engine-select");
   const classSelect = document.getElementById("class-select");
 
+  const classBadge = document.getElementById("class-badge");
+  const hpBadge = document.getElementById("hp-badge");
+  const acBadge = document.getElementById("ac-badge");
+  const statsDetail = document.getElementById("stats-detail");
+  const gearDetail = document.getElementById("gear-detail");
+  const gearDrawer = document.getElementById("gear-drawer");
+  const setupDrawer = document.getElementById("setup-drawer");
+  const gearBtn = document.getElementById("gear-btn");
+  const setupBtn = document.getElementById("setup-btn");
+
   let mlcEngine = null;
   let activeMode = "webgpu";
   let storyHistory = [];
 
   function updateHud() {
-    hudEl.textContent = player.summary();
+    classBadge.textContent = `Lv.1 ${player.className}`;
+    hpBadge.textContent = `HP ${player.hp}/${player.maxHp}`;
+    acBadge.textContent = `AC ${player.ac}`;
+
+    const statStr = Object.entries(player.stats)
+      .map(([k, v]) => {
+        const m = player.getMod(k);
+        return `${k} ${v} (${m >= 0 ? "+" + m : m})`;
+      })
+      .join(" · ");
+    statsDetail.innerHTML = `<strong>Ability Scores:</strong> ${statStr}`;
+    gearDetail.innerHTML = `<strong>Equipment:</strong> ${player.inventory.join(", ")}`;
   }
+
+  gearBtn.addEventListener("click", () => {
+    gearDrawer.classList.toggle("hidden");
+    setupDrawer.classList.add("hidden");
+  });
+
+  setupBtn.addEventListener("click", () => {
+    setupDrawer.classList.toggle("hidden");
+    gearDrawer.classList.add("hidden");
+  });
 
   classSelect.addEventListener("change", () => {
     const picked = CLASSES[classSelect.value];
@@ -232,7 +443,7 @@ End by asking the player what they do next.`;
 
     if (activeMode === "webgpu") {
       try {
-        statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B (cached after first load)...";
+        statusEl.textContent = "Loading WebGPU & Qwen2.5-1.5B (cached after 1st load)...";
         mlcEngine = await webllm.CreateMLCEngine(
           "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
           { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
@@ -251,6 +462,8 @@ End by asking the player what they do next.`;
   });
 
   function startGame() {
+    // Automatically collapse the setup menu to maximize story space on iPhone
+    setupDrawer.classList.add("hidden");
     inputEl.disabled = false;
     sendBtn.disabled = false;
     if (storyHistory.length === 0) {
@@ -290,6 +503,7 @@ End by asking the player what they do next.`;
     inputEl.value = "";
     inputEl.disabled = true;
     sendBtn.disabled = true;
+    inputEl.blur(); // Dismiss keyboard so user sees roll & narration clearly
     addMessage(`<strong>You:</strong> ${action}`, "player");
 
     try {
@@ -329,8 +543,8 @@ End by asking the player what they do next.`;
           const r = player.rollD20(stat);
           const success = (r.total >= dc || r.isCrit) && !r.isFumble;
           let tag = success ? "SUCCESS" : "FAILURE";
-          if (r.isCrit) tag = "CRITICAL SUCCESS (Natural 20!)";
-          if (r.isFumble) tag = "CRITICAL FAILURE (Natural 1!)";
+          if (r.isCrit) tag = "CRITICAL SUCCESS (Nat 20!)";
+          if (r.isFumble) tag = "CRITICAL FAILURE (Nat 1!)";
 
           addMessage(
             `<strong>[${skill} (${stat})]</strong> 1d20 (${r.nat}) + ${r.mod} = <strong>${r.total}</strong> vs DC ${dc} &rarr; <strong>${tag}</strong>`,
@@ -359,7 +573,6 @@ End by asking the player what they do next.`;
     } finally {
       inputEl.disabled = false;
       sendBtn.disabled = false;
-      inputEl.focus();
     }
   }
 
