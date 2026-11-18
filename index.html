@@ -1149,14 +1149,32 @@ Core Rules:
     }
   }
 
-  async function callLLM(messages, jsonMode = false) {
+    async function callLLM(messages, jsonMode = false) {
     if (activeMode === "webgpu") {
-      const reply = await mlcEngine.chat.completions.create({
-        messages,
-        temperature: jsonMode ? 0.1 : 0.7,
-        max_tokens: jsonMode ? 120 : 280
-      });
-      return reply.choices[0].message.content;
+      try {
+        // Check if engine was disposed by Safari and reload if needed
+        if (!mlcEngine) {
+          statusEl.textContent = "Reloading WebGPU model after memory reset...";
+          mlcEngine = await webllm.CreateMLCEngine(
+            "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+            { initProgressCallback: (r) => { statusEl.textContent = r.text; } }
+          );
+        }
+        const reply = await mlcEngine.chat.completions.create({
+          messages,
+          temperature: jsonMode ? 0.1 : 0.7,
+          max_tokens: jsonMode ? 120 : 280
+        });
+        return reply.choices[0].message.content;
+      } catch (err) {
+        // If engine was disposed, reset reference and force reload on retry
+        if (err.message.includes("disposed") || err.message.includes("not loaded")) {
+          mlcEngine = null;
+          statusEl.textContent = "Memory refreshed. Retrying...";
+          return await callLLM(messages, jsonMode); // Auto-retry once
+        }
+        throw err;
+      }
     } else {
       const res = await fetch("http://127.0.0.1:8080/v1/chat/completions", {
         method: "POST",
