@@ -17,6 +17,7 @@
       --muted: #9498a6;
       --cyan: #5bc0be;
       --success: #66bb6a;
+      --danger: #ef5350;
 
       /* Adaptive layout tokens (updated dynamically by device tier) */
       --shell-max-w: 100%;
@@ -169,7 +170,7 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .btn-small:hover { border-color: var(--accent); }
+    .btn-small:hover, .btn-small.active { border-color: var(--accent); color: var(--accent); }
 
     .panel-box {
       background: var(--card);
@@ -178,9 +179,9 @@
       padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       width: 100%;
-      max-height: 45vh;
+      max-height: 48vh;
       overflow-y: auto;
     }
     .panel-box.hidden { display: none; }
@@ -192,6 +193,126 @@
       overflow-wrap: anywhere;
     }
     .info-text strong { color: var(--accent); }
+
+    /* Inventory Drawer Styles */
+    .inv-equipped-bar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
+    }
+    html[data-device="mobile"] .inv-equipped-bar {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .equip-slot {
+      background: #161822;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--font-small);
+    }
+    .equip-slot-info {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .equip-slot-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .equip-slot-val {
+      color: var(--accent);
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .equip-slot-val.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+
+    .inv-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+    }
+    .inv-row {
+      background: #161822;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: var(--font-small);
+    }
+    .inv-row.is-equipped {
+      border-color: rgba(229, 169, 60, 0.6);
+      background: rgba(229, 169, 60, 0.08);
+    }
+    .inv-item-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+    }
+    .inv-item-name {
+      font-weight: 600;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .inv-item-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .inv-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .btn-mini {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-mini.equip { border-color: var(--accent); color: var(--accent); }
+    .btn-mini.equipped { background: var(--accent); color: #111; border-color: var(--accent); }
+    .btn-mini.use { border-color: var(--success); color: var(--success); }
+    .btn-mini.drop { color: var(--muted); padding: 4px 6px; }
+    .btn-mini.drop:hover { color: var(--danger); border-color: var(--danger); }
+
+    .inv-add-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      align-items: center;
+    }
+    html[data-device="mobile"] .inv-add-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .inv-add-row input, .inv-add-row select {
+      padding: 6px 8px;
+      font-size: var(--font-small);
+    }
+    .inv-add-row button {
+      padding: 6px 10px;
+      font-size: var(--font-small);
+    }
 
     #status-banner {
       font-size: var(--font-small);
@@ -412,9 +533,6 @@
       color: var(--accent);
       cursor: default;
     }
-    .skill-item.maxed {
-      opacity: 0.55;
-    }
 
     .hw-note {
       font-size: var(--font-small);
@@ -426,6 +544,17 @@
       line-height: 1.4;
     }
     .hw-note strong { color: var(--cyan); }
+
+    #custom-endpoint-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #custom-endpoint-box.hidden { display: none; }
 
     .nav-row {
       display: flex;
@@ -511,6 +640,7 @@
         </div>
         <div class="hud-buttons">
           <button class="btn-small" id="sheet-btn" type="button">Sheet</button>
+          <button class="btn-small" id="inv-btn" type="button">Inventory</button>
           <button class="btn-small" id="builder-toggle-btn" type="button">Creator</button>
           <button class="btn-small" id="export-btn" type="button" title="Export Save">Export</button>
           <button class="btn-small" id="import-btn" type="button" title="Import Save">Import</button>
@@ -523,10 +653,28 @@
         <div class="info-text" id="sheet-identity"></div>
         <div class="info-text" id="sheet-stats"></div>
         <div class="info-text" id="sheet-skills"></div>
-        <div class="info-text" id="sheet-gear"></div>
+        <div class="info-text" id="sheet-equipped"></div>
       </div>
 
-      <div id="status-banner">[v4.0 Adaptive Hardware] Complete steps 1–4 to begin your adventure.</div>
+      <!-- Interactive Inventory Drawer -->
+      <div class="panel-box hidden" id="inventory-panel">
+        <div class="inv-equipped-bar" id="inv-equipped-bar"></div>
+        <div class="inv-list" id="inv-list"></div>
+        <div class="inv-add-row">
+          <input type="text" id="inv-add-name" placeholder="Add loot (e.g. Dagger, Chain Shirt, Potion of Healing)..." />
+          <select id="inv-add-type">
+            <option value="auto">Auto Type</option>
+            <option value="weapon">Weapon</option>
+            <option value="armor">Armor</option>
+            <option value="shield">Shield</option>
+            <option value="consumable">Potion / Use</option>
+            <option value="gear">Gear</option>
+          </select>
+          <button type="button" class="secondary" id="inv-add-btn">+ Add</button>
+        </div>
+      </div>
+
+      <div id="status-banner">[v4.3 Interactive Inventory] Complete steps 1–4 to begin your adventure.</div>
     </header>
 
     <main id="main-area">
@@ -631,13 +779,25 @@
             <span class="step-title">4. Skills, Gear & Launch</span>
             <span class="step-badge" id="skill-counter-badge">Pick Skills</span>
           </div>
-          <div class="field-label">Select Class Skill Proficiencies (+2 Prof. Bonus at Lv. 1). Uncheck any skill to swap:</div>
+          <div class="field-label">Select Class Skill Proficiencies (+2 Prof. Bonus at Lv. 1). Clicking a new skill when full swaps out your oldest pick:</div>
           <div class="skill-grid" id="skill-grid"></div>
           <div class="info-text" id="gear-preview"></div>
           <div class="hw-note" id="hw-model-note">Analyzing device capabilities for AI models...</div>
           <div class="grid-split stack-mobile">
             <select id="engine-select"></select>
             <button type="button" class="primary" id="init-btn">Begin Campaign</button>
+          </div>
+          <div id="custom-endpoint-box" class="hidden">
+            <div class="grid-2">
+              <div class="field-group">
+                <label class="field-label" for="custom-url-input">OpenAI-Compatible Endpoint URL</label>
+                <input type="text" id="custom-url-input" value="http://127.0.0.1:8080/v1/chat/completions" placeholder="http://192.168.50.x:11434/v1/chat/completions" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="custom-model-input">Model Name (optional for localhost, required for Ollama)</label>
+                <input type="text" id="custom-model-input" value="" placeholder="e.g. qwen2.5:14b or llama3.1:8b" />
+              </div>
+            </div>
           </div>
           <div class="nav-row">
             <button type="button" class="secondary" id="back-step-3">&larr; Back</button>
@@ -667,9 +827,12 @@
   const hardwarePill = document.getElementById("hardware-pill");
   const hwModelNote = document.getElementById("hw-model-note");
   const engineSelect = document.getElementById("engine-select");
+  const customEndpointBox = document.getElementById("custom-endpoint-box");
+  const customUrlInput = document.getElementById("custom-url-input");
+  const customModelInput = document.getElementById("custom-model-input");
 
   const hwProfile = {
-    deviceClass: "desktop", // "mobile" | "tablet" | "desktop"
+    deviceClass: "desktop",
     label: "Desktop",
     hasWebGPU: Boolean(navigator.gpu),
     ramHintGB: navigator.deviceMemory || null,
@@ -716,10 +879,14 @@
     }
   }
 
+  function toggleCustomEndpointVisibility() {
+    customEndpointBox.classList.toggle("hidden", engineSelect.value !== "localhost");
+  }
+  engineSelect.addEventListener("change", toggleCustomEndpointVisibility);
+
   async function initHardwareAndModels() {
     applyAdaptiveLayout();
 
-    // Check WebGPU adapter if supported
     let gpuTier = hwProfile.deviceClass;
     let webgpuStatus = "No WebGPU";
     if (navigator.gpu) {
@@ -729,7 +896,6 @@
           hwProfile.hasWebGPU = true;
           webgpuStatus = "WebGPU";
           const maxBufMB = Math.round((adapter.limits?.maxBufferSize || 0) / (1024 * 1024));
-          // If a desktop reports low memory (<= 4GB) or very small WebGPU buffer, step down tier
           if (gpuTier === "desktop" && ((hwProfile.ramHintGB && hwProfile.ramHintGB <= 4) || (maxBufMB > 0 && maxBufMB < 512))) {
             gpuTier = "tablet";
           }
@@ -741,20 +907,19 @@
       }
     }
 
-    // Build hardware-matched model options
     if (gpuTier === "desktop") {
       hwProfile.models = [
         {
           value: "webgpu:Llama-3.2-3B-Instruct-q4f16_1-MLC",
-          label: "Better Performance — Llama 3.2 3B (~2.2GB, Fast)"
+          label: "Better Performance — Llama 3.2 3B (~2.2GB, Stable & Fast)"
         },
         {
           value: "webgpu:Qwen2.5-7B-Instruct-q4f16_1-MLC",
-          label: "Better Intelligence — Qwen 2.5 7B (~4.5GB, Smarter / Slower)"
+          label: "Better Intelligence — Qwen 2.5 7B (~4.5GB, Smarter / May Hit GPU Limits)"
         },
         {
           value: "localhost",
-          label: "Localhost Server (127.0.0.1:8080)"
+          label: "Localhost / Ollama Server (Custom URL)"
         }
       ];
     } else if (gpuTier === "tablet") {
@@ -769,7 +934,7 @@
         },
         {
           value: "localhost",
-          label: "Localhost Server (127.0.0.1:8080)"
+          label: "Localhost / Ollama Server (Custom URL)"
         }
       ];
     } else {
@@ -784,7 +949,7 @@
         },
         {
           value: "localhost",
-          label: "Localhost Server (127.0.0.1:8080)"
+          label: "Localhost / Ollama Server (Custom URL)"
         }
       ];
     }
@@ -802,12 +967,13 @@
     } else if (!hwProfile.hasWebGPU) {
       engineSelect.value = "localhost";
     }
+    toggleCustomEndpointVisibility();
 
     const ramText = hwProfile.ramHintGB ? ` · ${hwProfile.ramHintGB}GB+ RAM` : "";
     hardwarePill.textContent = `${hwProfile.label} · ${webgpuStatus}`;
     hwModelNote.innerHTML = hwProfile.hasWebGPU
       ? `<strong>Hardware Detected:</strong> ${hwProfile.label} (${hwProfile.cores} threads${ramText}, WebGPU ready). Model options below are matched to this device.`
-      : `<strong>Hardware Detected:</strong> ${hwProfile.label} (WebGPU unavailable in this browser). Use <strong>Localhost</strong> or open in Safari/Chrome with WebGPU enabled.`;
+      : `<strong>Hardware Detected:</strong> ${hwProfile.label} (WebGPU unavailable in this browser). Use <strong>Localhost / Ollama</strong> or open in Safari/Chrome with WebGPU enabled.`;
   }
 
   if (window.visualViewport) {
@@ -816,7 +982,7 @@
   }
   window.addEventListener("resize", applyAdaptiveLayout);
 
-  // 1. PHB DATA TABLES (RACES, CLASSES, BACKGROUNDS, SKILLS)
+  // 1. PHB DATA TABLES (RACES, CLASSES, BACKGROUNDS, SKILLS, ITEMS)
   const STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
 
   const SKILLS = {
@@ -826,6 +992,71 @@
     "Performance": "CHA", "Persuasion": "CHA", "Religion": "INT", "Sleight of Hand": "DEX",
     "Stealth": "DEX", "Survival": "WIS"
   };
+
+  // Item catalog for equipping weapons/armor/shields and using consumables
+  const ITEM_CATALOG = {
+    // Weapons
+    "Greataxe": { type: "weapon", meta: "1d12 slashing · Two-Handed", twoHanded: true },
+    "2 Handaxes": { type: "weapon", meta: "1d6 slashing · Light, Thrown" },
+    "Rapier": { type: "weapon", meta: "1d8 piercing · Finesse" },
+    "Mace": { type: "weapon", meta: "1d6 bludgeoning" },
+    "Quarterstaff": { type: "weapon", meta: "1d6 bludgeoning · Versatile (1d8)" },
+    "Longsword": { type: "weapon", meta: "1d8 slashing · Versatile (1d10)" },
+    "Light Crossbow": { type: "weapon", meta: "1d8 piercing · Ranged, Two-Handed", twoHanded: true },
+    "Shortsword": { type: "weapon", meta: "1d6 piercing · Finesse, Light" },
+    "2 Shortswords": { type: "weapon", meta: "1d6 piercing · Finesse, Light" },
+    "10 Darts": { type: "weapon", meta: "1d4 piercing · Finesse, Thrown" },
+    "Longbow": { type: "weapon", meta: "1d8 piercing · Ranged, Two-Handed", twoHanded: true },
+    "Shortbow": { type: "weapon", meta: "1d6 piercing · Ranged, Two-Handed", twoHanded: true },
+    "2 Daggers": { type: "weapon", meta: "1d4 piercing · Finesse, Light, Thrown" },
+    // Armor
+    "Leather Armor": { type: "armor", baseAc: 11, dexCap: null, meta: "Light Armor · AC 11 + DEX" },
+    "Studded Leather": { type: "armor", baseAc: 12, dexCap: null, meta: "Light Armor · AC 12 + DEX" },
+    "Hide Armor": { type: "armor", baseAc: 12, dexCap: 2, meta: "Medium Armor · AC 12 + DEX (max 2)" },
+    "Chain Shirt": { type: "armor", baseAc: 13, dexCap: 2, meta: "Medium Armor · AC 13 + DEX (max 2)" },
+    "Scale Mail": { type: "armor", baseAc: 14, dexCap: 2, meta: "Medium Armor · AC 14 + DEX (max 2)" },
+    "Breastplate": { type: "armor", baseAc: 14, dexCap: 2, meta: "Medium Armor · AC 14 + DEX (max 2)" },
+    "Half Plate": { type: "armor", baseAc: 15, dexCap: 2, meta: "Medium Armor · AC 15 + DEX (max 2)" },
+    "Chain Mail": { type: "armor", baseAc: 16, dexCap: 0, meta: "Heavy Armor · AC 16" },
+    "Splint Armor": { type: "armor", baseAc: 17, dexCap: 0, meta: "Heavy Armor · AC 17" },
+    "Plate Armor": { type: "armor", baseAc: 18, dexCap: 0, meta: "Heavy Armor · AC 18" },
+    // Shields
+    "Shield": { type: "shield", acBonus: 2, meta: "+2 AC" },
+    "Wooden Shield": { type: "shield", acBonus: 2, meta: "+2 AC" },
+    // Consumables
+    "Potion of Healing": { type: "consumable", effect: "heal", dice: [2, 4, 2], meta: "Consumable · Restores 2d4 + 2 HP" },
+    "Greater Potion of Healing": { type: "consumable", effect: "heal", dice: [4, 4, 4], meta: "Consumable · Restores 4d4 + 4 HP" }
+  };
+
+  function getItemInfo(itemName, customTypes = {}) {
+    if (ITEM_CATALOG[itemName]) return ITEM_CATALOG[itemName];
+    const lower = itemName.toLowerCase();
+    const forcedType = customTypes[itemName];
+    if (forcedType === "weapon") return { type: "weapon", meta: "Custom Weapon" };
+    if (forcedType === "armor") return { type: "armor", baseAc: 13, dexCap: 2, meta: "Custom Armor · AC 13 + DEX (max 2)" };
+    if (forcedType === "shield") return { type: "shield", acBonus: 2, meta: "Custom Shield · +2 AC" };
+    if (forcedType === "consumable") {
+      if (lower.includes("heal")) return { type: "consumable", effect: "heal", dice: [2, 4, 2], meta: "Consumable · Restores 2d4 + 2 HP" };
+      return { type: "consumable", effect: "generic", meta: "Consumable" };
+    }
+    if (forcedType === "gear") return { type: "gear", meta: "Gear / Equipment" };
+
+    // Auto-detect by name keywords
+    if (lower.includes("potion") || lower.includes("elixir") || lower.includes("scroll") || lower.includes("ration")) {
+      if (lower.includes("greater") && lower.includes("heal")) return { type: "consumable", effect: "heal", dice: [4, 4, 4], meta: "Consumable · Restores 4d4 + 4 HP" };
+      if (lower.includes("heal")) return { type: "consumable", effect: "heal", dice: [2, 4, 2], meta: "Consumable · Restores 2d4 + 2 HP" };
+      return { type: "consumable", effect: "generic", meta: "Consumable" };
+    }
+    if (lower.includes("shield")) return { type: "shield", acBonus: 2, meta: "+2 AC" };
+    if (lower.includes("armor") || lower.includes("mail") || lower.includes("plate") || lower.includes("chain shirt") || lower.includes("leather")) {
+      return { type: "armor", baseAc: 13, dexCap: 2, meta: "Armor · AC 13 + DEX (max 2)" };
+    }
+    if (/(sword|axe|bow|dagger|mace|staff|spear|hammer|club|flail|halberd|glaive|lance|pike|scimitar|rapier|trident|whip|sling|dart|javelin|crossbow)/i.test(itemName)) {
+      const twoHanded = /(greataxe|greatsword|maul|halberd|glaive|pike|longbow|shortbow|crossbow)/i.test(itemName);
+      return { type: "weapon", meta: twoHanded ? "Weapon · Two-Handed" : "Weapon", twoHanded };
+    }
+    return { type: "gear", meta: "Gear / Pack" };
+  }
 
   const RACES = {
     "Human": { bonuses: { STR:1, DEX:1, CON:1, INT:1, WIS:1, CHA:1 }, traits: "Versatile (+1 to all Ability Scores, Speed 30ft)" },
@@ -843,74 +1074,62 @@
     "Barbarian": {
       hitDie: 12, saves: ["STR", "CON"], skillCount: 2,
       skillPool: ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"],
-      gear: ["Greataxe", "2 Handaxes", "Explorer's Pack", "Potion of Healing"],
-      calcAc: (m) => 10 + m.DEX + m.CON
+      gear: ["Greataxe", "2 Handaxes", "Explorer's Pack", "Potion of Healing"]
     },
     "Bard": {
       hitDie: 8, saves: ["DEX", "CHA"], skillCount: 3,
       skillPool: Object.keys(SKILLS),
-      gear: ["Rapier", "Lute", "Leather Armor", "Spells (Vicious Mockery, Healing Word, Charm Person)", "Potion of Healing"],
-      calcAc: (m) => 11 + m.DEX
+      gear: ["Rapier", "Lute", "Leather Armor", "Spells (Vicious Mockery, Healing Word, Charm Person)", "Potion of Healing"]
     },
     "Cleric": {
       hitDie: 8, saves: ["WIS", "CHA"], skillCount: 2,
       skillPool: ["History", "Insight", "Medicine", "Persuasion", "Religion"],
-      gear: ["Mace", "Scale Mail", "Shield", "Holy Symbol", "Spells (Sacred Flame, Cure Wounds, Guiding Bolt)", "Potion of Healing"],
-      calcAc: (m) => 14 + Math.min(2, m.DEX) + 2
+      gear: ["Mace", "Scale Mail", "Shield", "Holy Symbol", "Spells (Sacred Flame, Cure Wounds, Guiding Bolt)", "Potion of Healing"]
     },
     "Druid": {
       hitDie: 8, saves: ["INT", "WIS"], skillCount: 2,
       skillPool: ["Arcana", "Animal Handling", "Insight", "Medicine", "Nature", "Perception", "Religion", "Survival"],
-      gear: ["Quarterstaff", "Leather Armor", "Wooden Shield", "Druidic Focus", "Spells (Shillelagh, Entangle, Cure Wounds)", "Potion of Healing"],
-      calcAc: (m) => 11 + m.DEX + 2
+      gear: ["Quarterstaff", "Leather Armor", "Wooden Shield", "Druidic Focus", "Spells (Shillelagh, Entangle, Cure Wounds)", "Potion of Healing"]
     },
     "Fighter": {
       hitDie: 10, saves: ["STR", "CON"], skillCount: 2,
       skillPool: ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"],
-      gear: ["Longsword", "Shield", "Chain Mail", "Light Crossbow", "Potion of Healing"],
-      calcAc: () => 18
+      gear: ["Longsword", "Shield", "Chain Mail", "Light Crossbow", "Potion of Healing"]
     },
     "Monk": {
       hitDie: 8, saves: ["STR", "DEX"], skillCount: 2,
       skillPool: ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"],
-      gear: ["Shortsword", "10 Darts", "Explorer's Pack", "Potion of Healing"],
-      calcAc: (m) => 10 + m.DEX + m.WIS
+      gear: ["Shortsword", "10 Darts", "Explorer's Pack", "Potion of Healing"]
     },
     "Paladin": {
       hitDie: 10, saves: ["WIS", "CHA"], skillCount: 2,
       skillPool: ["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"],
-      gear: ["Longsword", "Shield", "Chain Mail", "Holy Symbol (Lay on Hands 5 HP, Divine Sense)", "Potion of Healing"],
-      calcAc: () => 18
+      gear: ["Longsword", "Shield", "Chain Mail", "Holy Symbol (Lay on Hands 5 HP, Divine Sense)", "Potion of Healing"]
     },
     "Ranger": {
       hitDie: 10, saves: ["STR", "DEX"], skillCount: 3,
       skillPool: ["Animal Handling", "Athletics", "Insight", "Investigation", "Nature", "Perception", "Stealth", "Survival"],
-      gear: ["Longbow", "2 Shortswords", "Scale Mail", "Explorer's Pack", "Potion of Healing"],
-      calcAc: (m) => 14 + Math.min(2, m.DEX)
+      gear: ["Longbow", "2 Shortswords", "Scale Mail", "Explorer's Pack", "Potion of Healing"]
     },
     "Rogue": {
       hitDie: 8, saves: ["DEX", "INT"], skillCount: 4,
       skillPool: ["Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Performance", "Persuasion", "Sleight of Hand", "Stealth"],
-      gear: ["Shortsword", "Shortbow", "2 Daggers", "Thieves' Tools", "Leather Armor", "Potion of Healing"],
-      calcAc: (m) => 11 + m.DEX
+      gear: ["Shortsword", "Shortbow", "2 Daggers", "Thieves' Tools", "Leather Armor", "Potion of Healing"]
     },
     "Sorcerer": {
       hitDie: 6, saves: ["CON", "CHA"], skillCount: 2,
       skillPool: ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"],
-      gear: ["Light Crossbow", "Arcane Focus", "2 Daggers", "Spells (Fire Bolt, Magic Missile, Burning Hands)", "Potion of Healing"],
-      calcAc: (m) => 13 + m.DEX
+      gear: ["Light Crossbow", "Arcane Focus", "2 Daggers", "Spells (Fire Bolt, Magic Missile, Burning Hands)", "Potion of Healing"]
     },
     "Warlock": {
       hitDie: 8, saves: ["WIS", "CHA"], skillCount: 2,
       skillPool: ["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"],
-      gear: ["Light Crossbow", "Leather Armor", "Arcane Focus", "Spells (Eldritch Blast, Hex, Armor of Agathys)", "Potion of Healing"],
-      calcAc: (m) => 11 + m.DEX
+      gear: ["Light Crossbow", "Leather Armor", "Arcane Focus", "Spells (Eldritch Blast, Hex, Armor of Agathys)", "Potion of Healing"]
     },
     "Wizard": {
       hitDie: 6, saves: ["INT", "WIS"], skillCount: 2,
       skillPool: ["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"],
-      gear: ["Quarterstaff", "Spellbook", "Arcane Focus", "Spells (Fire Bolt, Mage Hand, Magic Missile, Shield, Mage Armor)", "Potion of Healing"],
-      calcAc: (m) => 12 + m.DEX
+      gear: ["Quarterstaff", "Spellbook", "Arcane Focus", "Spells (Fire Bolt, Mage Hand, Magic Missile, Shield, Mage Armor)", "Potion of Healing"]
     }
   };
 
@@ -925,71 +1144,6 @@
     "Urchin": { skills: ["Sleight of Hand", "Stealth"], feature: "City Secrets & pet mouse" }
   };
 
-  const POINT_COSTS = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
-  const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
-
-  // 2. ACTIVE PLAYER CHARACTER OBJECT
-  const player = {
-    name: "Aelar",
-    race: "Human",
-    className: "Fighter",
-    background: "Soldier",
-    alignment: "Neutral Good",
-    dmgTone: "Heroic Fantasy",
-    level: 1,
-    profBonus: 2,
-    baseStats: { STR: 15, DEX: 13, CON: 14, INT: 10, WIS: 12, CHA: 8 },
-    chosenSkills: new Set(["Perception", "Survival"]),
-    hp: 12,
-    maxHp: 12,
-    ac: 18,
-    inventory: [],
-
-    getFinalStat(stat) {
-      const base = this.baseStats[stat] ?? 10;
-      const racial = RACES[this.race]?.bonuses[stat] ?? 0;
-      return base + racial;
-    },
-    getMod(stat) {
-      return Math.floor((this.getFinalStat(stat) - 10) / 2);
-    },
-    getAllProficientSkills() {
-      const bgSkills = BACKGROUNDS[this.background]?.skills ?? [];
-      return Array.from(new Set([...bgSkills, ...this.chosenSkills]));
-    },
-    isSkillProficient(skillName) {
-      if (!skillName) return false;
-      const lower = skillName.toLowerCase();
-      return this.getAllProficientSkills().some(s => lower.includes(s.toLowerCase()));
-    },
-    recalculate() {
-      const cls = CLASSES[this.className];
-      const mods = {};
-      STATS.forEach(s => { mods[s] = this.getMod(s); });
-      this.maxHp = Math.max(1, cls.hitDie + mods.CON);
-      this.hp = this.maxHp;
-      this.ac = cls.calcAc(mods);
-      this.inventory = [...cls.gear];
-    },
-    rollD20(stat, skillName = "") {
-      const nat = Math.floor(Math.random() * 20) + 1;
-      const mod = this.getMod(stat);
-      const isProf = this.isSkillProficient(skillName);
-      const prof = isProf ? this.profBonus : 0;
-      return { nat, mod, prof, isProf, total: nat + mod + prof, isCrit: nat === 20, isFumble: nat === 1 };
-    },
-    summary() {
-      return `${this.name} (Lv.1 ${this.race} ${this.className}, ${this.background}) | HP: ${this.hp}/${this.maxHp} | AC: ${this.ac} | Skills: ${this.getAllProficientSkills().join(", ")} | Gear: ${this.inventory.join(", ")}`;
-    }
-  };
-
-  // 3. UI REFERENCES & WIZARD INITIALIZATION
-  const raceSelect = document.getElementById("race-select");
-  const classSelect = document.getElementById("class-select");
-  const bgSelect = document.getElementById("bg-select");
-  const alignSelect = document.getElementById("align-select");
-  const dmgToneSelect = document.getElementById("dmg-tone-select");
-  const charNameInput = document.getElementById("char-name");
   const RACE_NAMES = {
     "Human": {
       first: ["Aelar", "Bram", "Darian", "Elara", "Garrick", "Helena", "Kaelen", "Lyra", "Merek", "Rowan", "Sera", "Talia"],
@@ -1029,17 +1183,130 @@
     }
   };
 
-  document.getElementById("random-name-btn").addEventListener("click", () => {
-    const pool = RACE_NAMES[raceSelect.value] || RACE_NAMES["Human"];
-    let nextName = charNameInput.value;
-    for (let i = 0; i < 5 && nextName === charNameInput.value; i++) {
-      const first = pool.first[Math.floor(Math.random() * pool.first.length)];
-      const last = pool.last[Math.floor(Math.random() * pool.last.length)];
-      nextName = `${first} ${last}`;
+  const POINT_COSTS = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
+  const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+
+  // 2. ACTIVE PLAYER CHARACTER OBJECT
+  const player = {
+    name: "Aelar",
+    race: "Human",
+    className: "Fighter",
+    background: "Soldier",
+    alignment: "Neutral Good",
+    dmgTone: "Heroic Fantasy",
+    level: 1,
+    profBonus: 2,
+    baseStats: { STR: 15, DEX: 13, CON: 14, INT: 10, WIS: 12, CHA: 8 },
+    chosenSkills: new Set(),
+    hp: 12,
+    maxHp: 12,
+    ac: 18,
+    inventory: [],
+    customItemTypes: {},
+    equipped: { weapon: null, armor: null, shield: null },
+    _gearClassLoaded: null,
+
+    getFinalStat(stat) {
+      const base = this.baseStats[stat] ?? 10;
+      const racial = RACES[this.race]?.bonuses[stat] ?? 0;
+      return base + racial;
+    },
+    getMod(stat) {
+      return Math.floor((this.getFinalStat(stat) - 10) / 2);
+    },
+    getAllProficientSkills() {
+      const bgSkills = BACKGROUNDS[this.background]?.skills ?? [];
+      return Array.from(new Set([...bgSkills, ...this.chosenSkills]));
+    },
+    isSkillProficient(skillName) {
+      if (!skillName) return false;
+      const lower = skillName.toLowerCase();
+      return this.getAllProficientSkills().some(s => lower.includes(s.toLowerCase()));
+    },
+    autoEquipDefaults() {
+      this.equipped = { weapon: null, armor: null, shield: null };
+      for (const item of this.inventory) {
+        const info = getItemInfo(item, this.customItemTypes);
+        if (info.type === "weapon" && !this.equipped.weapon) {
+          this.equipped.weapon = item;
+        } else if (info.type === "armor" && !this.equipped.armor) {
+          this.equipped.armor = item;
+        } else if (info.type === "shield" && !this.equipped.shield) {
+          const wInfo = this.equipped.weapon ? getItemInfo(this.equipped.weapon, this.customItemTypes) : null;
+          if (!wInfo?.twoHanded) this.equipped.shield = item;
+        }
+      }
+    },
+    recalculateAc() {
+      const dex = this.getMod("DEX");
+      const con = this.getMod("CON");
+      const wis = this.getMod("WIS");
+      let baseAc = 10 + dex;
+
+      if (this.equipped.armor && this.inventory.includes(this.equipped.armor)) {
+        const aInfo = getItemInfo(this.equipped.armor, this.customItemTypes);
+        const rawBase = aInfo.baseAc ?? 12;
+        const dexAdd = aInfo.dexCap === 0 ? 0 : (aInfo.dexCap ? Math.min(aInfo.dexCap, dex) : dex);
+        baseAc = rawBase + dexAdd;
+      } else {
+        // Unarmored AC by class
+        if (this.className === "Barbarian") baseAc = 10 + dex + con;
+        else if (this.className === "Monk" && !this.equipped.shield) baseAc = 10 + dex + wis;
+        else if (this.className === "Sorcerer") baseAc = 13 + dex;
+        else if (this.className === "Wizard") baseAc = 12 + dex;
+        else baseAc = 10 + dex;
+      }
+
+      if (this.equipped.shield && this.inventory.includes(this.equipped.shield)) {
+        const sInfo = getItemInfo(this.equipped.shield, this.customItemTypes);
+        baseAc += (sInfo.acBonus ?? 2);
+      }
+      this.ac = baseAc;
+    },
+    recalculate(resetGear = false) {
+      const cls = CLASSES[this.className];
+      const conMod = this.getMod("CON");
+      const prevMax = this.maxHp;
+      this.maxHp = Math.max(1, cls.hitDie + conMod);
+      if (resetGear || this._gearClassLoaded !== this.className) {
+        this.inventory = [...cls.gear];
+        this.customItemTypes = {};
+        this.autoEquipDefaults();
+        this._gearClassLoaded = this.className;
+        this.hp = this.maxHp;
+      } else if (this.hp === prevMax || this.hp > this.maxHp) {
+        this.hp = this.maxHp;
+      }
+      this.recalculateAc();
+    },
+    equippedSummary() {
+      const parts = [];
+      if (this.equipped.weapon) parts.push(`Weapon: ${this.equipped.weapon}`);
+      else parts.push("Weapon: Unarmed");
+      if (this.equipped.armor) parts.push(`Armor: ${this.equipped.armor}`);
+      else parts.push("Armor: Unarmored");
+      if (this.equipped.shield) parts.push(`Shield: ${this.equipped.shield}`);
+      return parts.join(" | ");
+    },
+    rollD20(stat, skillName = "") {
+      const nat = Math.floor(Math.random() * 20) + 1;
+      const mod = this.getMod(stat);
+      const isProf = this.isSkillProficient(skillName);
+      const prof = isProf ? this.profBonus : 0;
+      return { nat, mod, prof, isProf, total: nat + mod + prof, isCrit: nat === 20, isFumble: nat === 1 };
+    },
+    summary() {
+      return `${this.name} (Lv.1 ${this.race} ${this.className}, ${this.background}) | HP: ${this.hp}/${this.maxHp} | AC: ${this.ac} | Equipped: ${this.equippedSummary()} | Skills: ${this.getAllProficientSkills().join(", ")} | All Gear: ${this.inventory.join(", ")}`;
     }
-    charNameInput.value = nextName;
-    refreshBuilderUI();
-  });
+  };
+
+  // 3. UI REFERENCES & WIZARD INITIALIZATION
+  const raceSelect = document.getElementById("race-select");
+  const classSelect = document.getElementById("class-select");
+  const bgSelect = document.getElementById("bg-select");
+  const alignSelect = document.getElementById("align-select");
+  const dmgToneSelect = document.getElementById("dmg-tone-select");
+  const charNameInput = document.getElementById("char-name");
   const statMethodSelect = document.getElementById("stat-method-select");
   const rerollBtn = document.getElementById("reroll-btn");
   const statsGrid = document.getElementById("stats-grid");
@@ -1051,6 +1318,16 @@
   const inputEl = document.getElementById("player-input");
   const sendBtn = document.getElementById("send-btn");
   const initBtn = document.getElementById("init-btn");
+
+  const sheetPanel = document.getElementById("sheet-panel");
+  const invPanel = document.getElementById("inventory-panel");
+  const sheetBtn = document.getElementById("sheet-btn");
+  const invBtn = document.getElementById("inv-btn");
+  const invEquippedBar = document.getElementById("inv-equipped-bar");
+  const invListEl = document.getElementById("inv-list");
+  const invAddName = document.getElementById("inv-add-name");
+  const invAddType = document.getElementById("inv-add-type");
+  const invAddBtn = document.getElementById("inv-add-btn");
 
   Object.keys(RACES).forEach(r => {
     const opt = document.createElement("option");
@@ -1069,6 +1346,18 @@
     bgSelect.appendChild(opt);
   });
 
+  document.getElementById("random-name-btn").addEventListener("click", () => {
+    const pool = RACE_NAMES[raceSelect.value] || RACE_NAMES["Human"];
+    let nextName = charNameInput.value;
+    for (let i = 0; i < 5 && nextName === charNameInput.value; i++) {
+      const first = pool.first[Math.floor(Math.random() * pool.first.length)];
+      const last = pool.last[Math.floor(Math.random() * pool.last.length)];
+      nextName = `${first} ${last}`;
+    }
+    charNameInput.value = nextName;
+    refreshBuilderUI();
+  });
+
   function showStep(stepNum) {
     [1, 2, 3, 4].forEach(n => {
       document.getElementById(`step-${n}`).classList.toggle("hidden", n !== stepNum);
@@ -1084,15 +1373,215 @@
   document.getElementById("to-step-4").addEventListener("click", () => showStep(4));
   document.getElementById("back-step-3").addEventListener("click", () => showStep(3));
 
-  // Drawer toggles
-  const sheetPanel = document.getElementById("sheet-panel");
-  document.getElementById("sheet-btn").addEventListener("click", () => {
-    sheetPanel.classList.toggle("hidden");
+  // Drawer toggles (Sheet vs Inventory mutually exclusive)
+  sheetBtn.addEventListener("click", () => {
+    const willOpen = sheetPanel.classList.contains("hidden");
+    sheetPanel.classList.toggle("hidden", !willOpen);
+    invPanel.classList.add("hidden");
+    sheetBtn.classList.toggle("active", willOpen);
+    invBtn.classList.remove("active");
   });
+
+  invBtn.addEventListener("click", () => {
+    const willOpen = invPanel.classList.contains("hidden");
+    invPanel.classList.toggle("hidden", !willOpen);
+    sheetPanel.classList.add("hidden");
+    invBtn.classList.toggle("active", willOpen);
+    sheetBtn.classList.remove("active");
+    if (willOpen) renderInventoryPanel();
+  });
+
   document.getElementById("builder-toggle-btn").addEventListener("click", () => {
     const isHidden = builderEl.classList.toggle("hidden");
     logEl.classList.toggle("hidden", !isHidden);
   });
+
+  // INTERACTIVE INVENTORY LOGIC (Equip, Unequip, Use Potions, Add/Remove Loot)
+  function toggleEquipItem(itemName) {
+    const info = getItemInfo(itemName, player.customItemTypes);
+    let note = "";
+
+    if (info.type === "weapon") {
+      if (player.equipped.weapon === itemName) {
+        player.equipped.weapon = null;
+        note = `Unequipped ${itemName}.`;
+      } else {
+        player.equipped.weapon = itemName;
+        if (info.twoHanded && player.equipped.shield) {
+          const oldShield = player.equipped.shield;
+          player.equipped.shield = null;
+          note = `Equipped ${itemName} (stowed ${oldShield}).`;
+        } else {
+          note = `Equipped ${itemName}.`;
+        }
+      }
+    } else if (info.type === "armor") {
+      if (player.equipped.armor === itemName) {
+        player.equipped.armor = null;
+        note = `Removed ${itemName}.`;
+      } else {
+        player.equipped.armor = itemName;
+        note = `Equipped ${itemName}.`;
+      }
+    } else if (info.type === "shield") {
+      if (player.equipped.shield === itemName) {
+        player.equipped.shield = null;
+        note = `Stowed ${itemName}.`;
+      } else {
+        player.equipped.shield = itemName;
+        const wInfo = player.equipped.weapon ? getItemInfo(player.equipped.weapon, player.customItemTypes) : null;
+        if (wInfo?.twoHanded) {
+          const oldWep = player.equipped.weapon;
+          player.equipped.weapon = null;
+          note = `Equipped ${itemName} (stowed two-handed ${oldWep}).`;
+        } else {
+          note = `Equipped ${itemName}.`;
+        }
+      }
+    }
+
+    player.recalculateAc();
+    updateHud();
+    if (note) statusEl.textContent = `${note} (AC ${player.ac})`;
+  }
+
+  function useConsumable(index) {
+    const itemName = player.inventory[index];
+    if (!itemName) return;
+    const info = getItemInfo(itemName, player.customItemTypes);
+    player.inventory.splice(index, 1);
+
+    let msg = `Used ${itemName}.`;
+    if (info.effect === "heal") {
+      const [count, sides, bonus] = info.dice || [2, 4, 2];
+      let rolled = bonus;
+      for (let i = 0; i < count; i++) rolled += Math.floor(Math.random() * sides) + 1;
+      const before = player.hp;
+      player.hp = Math.min(player.maxHp, player.hp + rolled);
+      const gained = player.hp - before;
+      msg = `Drank ${itemName}: rolled +${rolled} HP (restored ${gained} HP → ${player.hp}/${player.maxHp}).`;
+    }
+
+    updateHud();
+    statusEl.textContent = msg;
+    if (storyHistory.length > 0) {
+      addMessage(msg, "system");
+    }
+  }
+
+  function removeItem(index) {
+    const itemName = player.inventory[index];
+    if (!itemName) return;
+    player.inventory.splice(index, 1);
+
+    // Unequip if no remaining copy exists in inventory
+    if (!player.inventory.includes(itemName)) {
+      if (player.equipped.weapon === itemName) player.equipped.weapon = null;
+      if (player.equipped.armor === itemName) player.equipped.armor = null;
+      if (player.equipped.shield === itemName) player.equipped.shield = null;
+    }
+    player.recalculateAc();
+    updateHud();
+    statusEl.textContent = `Dropped ${itemName}.`;
+  }
+
+  invAddBtn.addEventListener("click", () => {
+    const raw = invAddName.value.trim();
+    if (!raw) return;
+    const chosenType = invAddType.value;
+    player.inventory.push(raw);
+    if (chosenType !== "auto") {
+      player.customItemTypes[raw] = chosenType;
+    }
+    invAddName.value = "";
+    invAddType.value = "auto";
+    updateHud();
+    statusEl.textContent = `Added ${raw} to inventory.`;
+  });
+
+  invAddName.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") invAddBtn.click();
+  });
+
+  function renderInventoryPanel() {
+    // 1. Equipped slots bar
+    invEquippedBar.innerHTML = "";
+    const slots = [
+      { key: "weapon", label: "Weapon", emptyText: "Unarmed" },
+      { key: "armor", label: "Armor", emptyText: "Unarmored" },
+      { key: "shield", label: "Shield", emptyText: "None" }
+    ];
+    slots.forEach(s => {
+      const val = player.equipped[s.key];
+      const div = document.createElement("div");
+      div.className = "equip-slot";
+      div.innerHTML = `
+        <div class="equip-slot-info">
+          <div class="equip-slot-label">${s.label}</div>
+          <div class="equip-slot-val ${val ? "" : "empty"}">${val || s.emptyText}</div>
+        </div>
+        ${val ? `<button type="button" class="btn-mini" data-unequip="${s.key}">Unequip</button>` : ""}
+      `;
+      const btn = div.querySelector("button[data-unequip]");
+      if (btn) {
+        btn.addEventListener("click", () => {
+          const old = player.equipped[s.key];
+          player.equipped[s.key] = null;
+          player.recalculateAc();
+          updateHud();
+          statusEl.textContent = `Unequipped ${old} (AC ${player.ac}).`;
+        });
+      }
+      invEquippedBar.appendChild(div);
+    });
+
+    // 2. Backpack items list
+    invListEl.innerHTML = "";
+    if (player.inventory.length === 0) {
+      invListEl.innerHTML = `<div class="info-text">Your pack is empty. Add loot below.</div>`;
+      return;
+    }
+
+    player.inventory.forEach((itemName, idx) => {
+      const info = getItemInfo(itemName, player.customItemTypes);
+      const isEquipped =
+        (info.type === "weapon" && player.equipped.weapon === itemName) ||
+        (info.type === "armor" && player.equipped.armor === itemName) ||
+        (info.type === "shield" && player.equipped.shield === itemName);
+
+      const row = document.createElement("div");
+      row.className = `inv-row ${isEquipped ? "is-equipped" : ""}`;
+
+      let actionBtnHtml = "";
+      if (info.type === "weapon" || info.type === "armor" || info.type === "shield") {
+        actionBtnHtml = `<button type="button" class="btn-mini ${isEquipped ? "equipped" : "equip"}" data-action="equip">${isEquipped ? "Equipped" : "Equip"}</button>`;
+      } else if (info.type === "consumable") {
+        actionBtnHtml = `<button type="button" class="btn-mini use" data-action="use">Use</button>`;
+      }
+
+      row.innerHTML = `
+        <div class="inv-item-main">
+          <span class="inv-item-name">${itemName}</span>
+          <span class="inv-item-meta">${info.meta}</span>
+        </div>
+        <div class="inv-actions">
+          ${actionBtnHtml}
+          <button type="button" class="btn-mini drop" data-action="drop" title="Remove item">&times;</button>
+        </div>
+      `;
+
+      const equipBtn = row.querySelector('button[data-action="equip"]');
+      if (equipBtn) equipBtn.addEventListener("click", () => toggleEquipItem(itemName));
+
+      const useBtn = row.querySelector('button[data-action="use"]');
+      if (useBtn) useBtn.addEventListener("click", () => useConsumable(idx));
+
+      const dropBtn = row.querySelector('button[data-action="drop"]');
+      if (dropBtn) dropBtn.addEventListener("click", () => removeItem(idx));
+
+      invListEl.appendChild(row);
+    });
+  }
 
   // EXPORT & IMPORT SAVE LOGIC
   const exportBtn = document.getElementById("export-btn");
@@ -1105,7 +1594,10 @@
         name: player.name, race: player.race, className: player.className,
         background: player.background, alignment: player.alignment, dmgTone: player.dmgTone,
         level: player.level, baseStats: player.baseStats, chosenSkills: Array.from(player.chosenSkills),
-        hp: player.hp, maxHp: player.maxHp, ac: player.ac, inventory: player.inventory
+        hp: player.hp, maxHp: player.maxHp, ac: player.ac,
+        inventory: player.inventory,
+        customItemTypes: player.customItemTypes,
+        equipped: player.equipped
       },
       storyHistory
     };
@@ -1137,16 +1629,31 @@
         player.level = saved.level || 1;
         if (saved.baseStats) player.baseStats = { ...saved.baseStats };
         player.chosenSkills = new Set(saved.chosenSkills || []);
-        player.recalculate();
-        // Preserve saved HP, AC, and Inventory instead of overwriting with defaults
+        player._gearClassLoaded = player.className;
+
+        if (Array.isArray(saved.inventory)) {
+          player.inventory = [...saved.inventory];
+        } else {
+          player.inventory = [...CLASSES[player.className].gear];
+        }
+        player.customItemTypes = saved.customItemTypes ? { ...saved.customItemTypes } : {};
+        if (saved.equipped) {
+          player.equipped = {
+            weapon: saved.equipped.weapon || null,
+            armor: saved.equipped.armor || null,
+            shield: saved.equipped.shield || null
+          };
+        } else {
+          player.autoEquipDefaults();
+        }
+
+        player.recalculate(false);
         if (typeof saved.hp === "number") player.hp = saved.hp;
         if (typeof saved.maxHp === "number") player.maxHp = saved.maxHp;
-        if (typeof saved.ac === "number") player.ac = saved.ac;
-        if (Array.isArray(saved.inventory)) player.inventory = [...saved.inventory];
+        player.recalculateAc();
 
         storyHistory = Array.isArray(data.storyHistory) ? data.storyHistory : [];
 
-        // Sync form controls
         charNameInput.value = player.name;
         raceSelect.value = player.race;
         classSelect.value = player.className;
@@ -1158,7 +1665,6 @@
         renderStatsGrid();
         renderSkillGrid();
 
-        // Rebuild story log on screen
         logEl.innerHTML = "";
         storyHistory.forEach(msg => {
           const type = msg.role === "assistant" ? "dm" : "player";
@@ -1284,54 +1790,64 @@
     });
   }
 
-  // FIXED SKILL GRID: Never auto-fills when you uncheck a skill
+  // SKILL GRID: Starts empty, updates in place, auto-swaps oldest pick when full
   function renderSkillGrid() {
     skillGrid.innerHTML = "";
     const cls = CLASSES[player.className];
     const bgSkills = BACKGROUNDS[player.background].skills;
 
-    // Only prune skills that are no longer valid for the current class/background
     Array.from(player.chosenSkills).forEach(sk => {
       if (!cls.skillPool.includes(sk) || bgSkills.includes(sk)) {
         player.chosenSkills.delete(sk);
       }
     });
-    // Trim excess if user switched from a class with more skills (e.g. Rogue -> Fighter)
     while (player.chosenSkills.size > cls.skillCount) {
-      const last = Array.from(player.chosenSkills).pop();
-      player.chosenSkills.delete(last);
+      const oldest = player.chosenSkills.values().next().value;
+      player.chosenSkills.delete(oldest);
     }
 
-    const atLimit = player.chosenSkills.size >= cls.skillCount;
-    const counterBadge = document.getElementById("skill-counter-badge");
-    counterBadge.textContent = `Chosen: ${player.chosenSkills.size} / ${cls.skillCount} Class Skills`;
-    counterBadge.classList.toggle("ready", player.chosenSkills.size === cls.skillCount);
+    const updateSkillStates = () => {
+      const counterBadge = document.getElementById("skill-counter-badge");
+      counterBadge.textContent = `Chosen: ${player.chosenSkills.size} / ${cls.skillCount} Class Skills`;
+      counterBadge.classList.toggle("ready", player.chosenSkills.size === cls.skillCount);
+
+      skillGrid.querySelectorAll("label.skill-item").forEach(label => {
+        const cb = label.querySelector("input");
+        const sk = cb.value;
+        const isBg = bgSkills.includes(sk);
+        cb.checked = isBg || player.chosenSkills.has(sk);
+      });
+    };
 
     cls.skillPool.forEach(sk => {
       const isBg = bgSkills.includes(sk);
-      const isChecked = isBg || player.chosenSkills.has(sk);
-      const isDisabled = isBg || (atLimit && !isChecked);
-
       const label = document.createElement("label");
-      label.className = `skill-item ${isBg ? "locked" : ""} ${isDisabled && !isBg ? "maxed" : ""}`;
+      label.className = `skill-item ${isBg ? "locked" : ""}`;
       label.innerHTML = `
-        <input type="checkbox" value="${sk}" ${isChecked ? "checked" : ""} ${isDisabled ? "disabled" : ""} />
+        <input type="checkbox" value="${sk}" ${isBg ? "checked disabled" : ""} />
         <span>${sk} (${SKILLS[sk]})${isBg ? " [BG]" : ""}</span>
       `;
       const cb = label.querySelector("input");
-      cb.addEventListener("change", () => {
-        if (cb.checked) {
-          if (player.chosenSkills.size < cls.skillCount) {
+      if (!isBg) {
+        cb.checked = player.chosenSkills.has(sk);
+        cb.addEventListener("change", () => {
+          if (cb.checked) {
+            if (player.chosenSkills.size >= cls.skillCount) {
+              const oldest = player.chosenSkills.values().next().value;
+              player.chosenSkills.delete(oldest);
+            }
             player.chosenSkills.add(sk);
+          } else {
+            player.chosenSkills.delete(sk);
           }
-        } else {
-          player.chosenSkills.delete(sk);
-        }
-        renderSkillGrid();
-        updateHud();
-      });
+          updateSkillStates();
+          updateHud();
+        });
+      }
       skillGrid.appendChild(label);
     });
+
+    updateSkillStates();
   }
 
   function refreshBuilderUI() {
@@ -1341,7 +1857,7 @@
     player.background = bgSelect.value;
     player.alignment = alignSelect.value;
     player.dmgTone = dmgToneSelect.value;
-    player.recalculate();
+    player.recalculate(false);
 
     const cls = CLASSES[player.className];
     const race = RACES[player.race];
@@ -1385,7 +1901,11 @@
     }).join(" · ");
     document.getElementById("sheet-stats").innerHTML = `<strong>Abilities:</strong> ${statLine}`;
     document.getElementById("sheet-skills").innerHTML = `<strong>Proficient Skills (+2):</strong> ${player.getAllProficientSkills().join(", ")}`;
-    document.getElementById("sheet-gear").innerHTML = `<strong>Equipment:</strong> ${player.inventory.join(", ")}`;
+    document.getElementById("sheet-equipped").innerHTML = `<strong>Equipped:</strong> ${player.equippedSummary()}`;
+
+    if (!invPanel.classList.contains("hidden")) {
+      renderInventoryPanel();
+    }
   }
 
   // 4. AI DUNGEON MASTER & STRICT ANTI-INVENTION ENGINE
@@ -1394,12 +1914,13 @@
 THE PLAYER CHARACTER:
 - Name: ${player.name}
 - Sheet: Level 1 ${player.alignment} ${player.race} ${player.className} (${player.background})
-- EXACT INVENTORY (DO NOT INVENT WEAPONS OR ITEMS): ${player.inventory.join(", ")}
+- CURRENTLY EQUIPPED: ${player.equippedSummary()}
+- FULL INVENTORY (DO NOT INVENT WEAPONS OR ITEMS): ${player.inventory.join(", ")}
 - HP: ${player.hp}/${player.maxHp} | AC: ${player.ac}
 
 STRICT LAWS FOR THE DM:
 1. NEVER write actions, movements, dialogue, or decisions for ${player.name}. Only describe the world, environment, and NPCs. Let the player decide what they do.
-2. NEVER invent items, weapons, or gear in ${player.name}'s possession. They ONLY have what is listed in EXACT INVENTORY above.
+2. NEVER invent items, weapons, or gear in ${player.name}'s possession. They ONLY have what is listed in FULL INVENTORY above and are wielding what is in CURRENTLY EQUIPPED.
 3. If the player asks a context question (e.g., "Who am I with?", "What do I see?"), answer it factually and naturally.
 4. Strictly obey the mechanical dice roll outcome in [SYSTEM]. Never roll dice yourself.
 5. Keep responses under 2 short paragraphs, vivid and atmospheric, and end by asking what they do next.`;
@@ -1452,7 +1973,8 @@ STRICT LAWS FOR THE DM:
         initBtn.disabled = false;
       }
     } else {
-      statusEl.textContent = "Connected to Localhost Server (127.0.0.1:8080)";
+      const endpoint = customUrlInput.value.trim() || "http://127.0.0.1:8080/v1/chat/completions";
+      statusEl.textContent = `Connected to ${endpoint}`;
       initBtn.disabled = false;
       startGame();
     }
@@ -1489,25 +2011,35 @@ STRICT LAWS FOR THE DM:
         });
         return reply.choices[0].message.content;
       } catch (err) {
-        if (retryCount < 1 && (err.message.includes("disposed") || err.message.includes("not loaded"))) {
+        if (
+          retryCount < 1 &&
+          (err.message.includes("disposed") ||
+           err.message.includes("not loaded") ||
+           err.message.includes("Buffer unmapped"))
+        ) {
           mlcEngine = null;
           loadedModelId = null;
-          statusEl.textContent = "WebGPU memory refreshed. Retrying...";
+          statusEl.textContent = "WebGPU buffer reset. Retrying...";
           return await callLLM(messages, jsonMode, retryCount + 1);
         }
         throw err;
       }
     } else {
-      const res = await fetch("http://127.0.0.1:8080/v1/chat/completions", {
+      const endpoint = customUrlInput.value.trim() || "http://127.0.0.1:8080/v1/chat/completions";
+      const customModel = customModelInput.value.trim();
+      const payload = {
+        messages,
+        temperature: jsonMode ? 0.1 : 0.7,
+        max_tokens: jsonMode ? 120 : 280
+      };
+      if (customModel) payload.model = customModel;
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages,
-          temperature: jsonMode ? 0.1 : 0.7,
-          max_tokens: jsonMode ? 120 : 280
-        })
+        body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error(`Localhost HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`Server HTTP ${res.status}`);
       const data = await res.json();
       return data.choices[0].message.content;
     }
@@ -1563,7 +2095,8 @@ Valid stats: STR, DEX, CON, INT, WIS, CHA, NONE. Set requires_roll to false if n
           sysNote = `SYSTEM: Action invalid (${intent.impossible_reason}). Narrate why it fails without rolling.`;
         } else {
           if (intent.item_consumed && player.inventory.includes(intent.item_consumed)) {
-            player.inventory = player.inventory.filter(i => i !== intent.item_consumed);
+            const idx = player.inventory.indexOf(intent.item_consumed);
+            if (idx !== -1) player.inventory.splice(idx, 1);
             if (intent.item_consumed.includes("Potion of Healing")) {
               const heal = Math.floor(Math.random() * 4) + 1 + Math.floor(Math.random() * 4) + 1 + 2;
               player.hp = Math.min(player.maxHp, player.hp + heal);
